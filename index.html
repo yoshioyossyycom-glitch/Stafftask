@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ゆりいか タスク管理</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 :root {
@@ -455,80 +458,74 @@ function getFacs()  {return (ST.get(K.fac)||[]).sort(function(a,b){return a.orde
 function getStaff() {return (ST.get(K.staff)||[]).sort(function(a,b){return (a.order||0)-(b.order||0);});}
 function getTasks() {return ST.get(K.task)||[];}
 
-/* ══ GAS API ══ */
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbxZraECJfiuJIXcuksTuzL0soJ198FBHll58FE7o56rTCxA-ChSt3hdj9crF4RHjc1i/exec';
-var _dbConnected = false;
+/* ══ Firebase ══ */
+var firebaseConfig = {
+  apiKey: "AIzaSyB-D90f-72b0lV2g0Ue6yc3-o30MBn6v0w",
+  authDomain: "task-6e73b.firebaseapp.com",
+  projectId: "task-6e73b",
+  storageBucket: "task-6e73b.firebasestorage.app",
+  messagingSenderId: "66320987902",
+  appId: "1:66320987902:web:90a2cebd6c2d34661817af"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
 
 function setDbStatus(connected){
-  _dbConnected = connected;
   var dot = document.getElementById('db-dot');
   var lbl = document.getElementById('db-status');
   if(!dot||!lbl) return;
   if(connected){
     dot.className='db-dot connected';
-    lbl.innerHTML='データベース接続済み<small>（スプレッドシート）</small>';
+    lbl.innerHTML='データベース接続済み<small>（Firebase）</small>';
   } else {
     dot.className='db-dot disconnected';
     lbl.innerHTML='データベース未接続<small>（オフライン動作中）</small>';
   }
 }
 
-function apiGet(params, onSuccess, onError){
-  var qs = Object.keys(params).map(function(k){
-    return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);
-  }).join('&');
-  fetch(GAS_URL+'?'+qs)
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d.status==='ok'){ setDbStatus(true); onSuccess(d); }
-      else { onError(d.message||'error'); }
-    })
-    .catch(function(e){ setDbStatus(false); onError(e.toString()); });
-}
-
-// スプレッドシートからタスクを取得
+// Firestoreからタスクを取得
 function fetchTasksFromDB(callback){
-  apiGet({action:'getTasks'}, function(d){
-    // スプレッドシートのデータをローカルにキャッシュ
-    ST.set(K.task, d.tasks||[]);
-    if(callback) callback(d.tasks||[]);
-  }, function(err){
-    console.warn('DB取得失敗、ローカルデータで動作:', err);
-    if(callback) callback(getTasks());
-  });
+  db.collection('tasks').orderBy('createdAt','desc').get()
+    .then(function(snap){
+      var tasks=[];
+      snap.forEach(function(doc){ tasks.push(Object.assign({id:doc.id}, doc.data())); });
+      ST.set(K.task, tasks);
+      setDbStatus(true);
+      if(callback) callback(tasks);
+    })
+    .catch(function(err){
+      console.warn('Firebase取得失敗、ローカルで動作:', err);
+      setDbStatus(false);
+      if(callback) callback(getTasks());
+    });
 }
 
-// スプレッドシートにタスクを保存
+// Firestoreにタスクを保存
 function saveTaskToDB(t, callback){
-  var facs=getFacs();
-  var staff=getStaff();
+  var facs=getFacs(), staff=getStaff();
   var fac=facs.find(function(f){return f.id===t.fid;});
   var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
-  var params={
-    action:'saveTask',
-    id:t.id, fid:t.fid,
-    facName:fac?fac.name:'',
-    date:t.date, text:t.text, tag:t.tag,
-    staffId:t.staffId||'',
-    staffName:s?s.name:'',
-    createdAt:t.createdAt
+  var data={
+    fid: t.fid,
+    facName: fac?fac.name:'',
+    date: t.date,
+    due: t.due||null,
+    text: t.text,
+    tag: t.tag,
+    staffId: t.staffId||null,
+    staffName: s?s.name:'',
+    createdAt: t.createdAt
   };
-  apiGet(params, function(d){
-    if(callback) callback(true);
-  }, function(err){
-    console.warn('DB保存失敗:', err);
-    if(callback) callback(false);
-  });
+  db.collection('tasks').doc(t.id).set(data)
+    .then(function(){ setDbStatus(true); if(callback) callback(true); })
+    .catch(function(err){ console.warn('Firebase保存失敗:', err); if(callback) callback(false); });
 }
 
-// スプレッドシートからタスクを削除
+// Firestoreからタスクを削除
 function deleteTaskFromDB(id, callback){
-  apiGet({action:'deleteTask', id:id}, function(d){
-    if(callback) callback(true);
-  }, function(err){
-    console.warn('DB削除失敗:', err);
-    if(callback) callback(false);
-  });
+  db.collection('tasks').doc(id).delete()
+    .then(function(){ if(callback) callback(true); })
+    .catch(function(err){ console.warn('Firebase削除失敗:', err); if(callback) callback(false); });
 }
 
 /* ══ ユーティリティ ══ */
