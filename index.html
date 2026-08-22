@@ -868,10 +868,11 @@ function renderRes() {
   var ress = getRes(), facs = getFacs();
   var el = document.getElementById('res-list');
   if (!ress.length) { el.innerHTML = '<div class="ep">利用者が登録されていません</div>'; return; }
-  el.innerHTML = ress.map(function(r) {
+  el.innerHTML = ress.map(function(r, i) {
     var fac = facs.find(function(f) { return f.id === r.fid; });
     return '<div class="mitem" data-id="'+r.id+'">' +
       '<div class="dh"><span></span><span></span><span></span></div>' +
+      '<div style="width:24px;text-align:center;font-size:12px;font-weight:700;color:var(--txm);flex-shrink:0;">'+(i+1)+'</div>' +
       '<span style="font-size:20px;flex-shrink:0;">🏠</span>' +
       '<div class="mibody">' +
         '<div class="minm">'+esc(r.name)+'</div>' +
