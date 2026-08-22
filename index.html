@@ -495,7 +495,60 @@ function fetchTasksFromDB(cb){
       if(cb) cb(getTasks());
     });
 }
+
+// 設定データ（施設・職員・利用者）をFirebaseから取得
+function fetchSettingsFromDB(cb){
+  db.collection('settings').doc('data').get()
+    .then(function(doc){
+      if(doc.exists){
+        var d=doc.data();
+        if(d.fac&&d.fac.length)   ST.set(K.fac,   d.fac);
+        if(d.staff&&d.staff.length) ST.set(K.staff, d.staff);
+        if(d.res&&d.res.length)   ST.set(K.res,   d.res);
+      }
+      if(cb) cb();
+    })
+    .catch(function(err){
+      console.warn('設定取得失敗:',err);
+      if(cb) cb();
+    });
+}
+
+// 設定データをFirebaseに保存（施設・職員・利用者が変更されるたびに呼ぶ）
+function saveSettingsToDB(){
+  db.collection('settings').doc('data').set({
+    fac:   getFacs(),
+    staff: getStaff(),
+    res:   getRes()
+  }).catch(function(err){
+    console.warn('設定保存失敗:',err);
+  });
+}
+
 function saveTaskToDB(t,cb){
+  var facs=getFacs(),staff=getStaff(),ress=getRes();
+  var fac=facs.find(function(f){return f.id===t.fid;});
+  var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
+  var r=t.resId?ress.find(function(x){return x.id===t.resId;}):null;
+  var data={
+    fid:t.fid||'', facName:fac?fac.name:'',
+    resId:t.resId||'', resName:r?r.name:'',
+    date:t.date||'', text:t.text||'', tag:t.tag||'todo',
+    staffId:t.staffId||'', staffName:s?s.name:'',
+    createdAt:t.createdAt||new Date().toISOString()
+  };
+  db.collection('tasks').doc(t.id).set(data)
+    .then(function(){setDbStatus(true);if(cb)cb(true);})
+    .catch(function(err){
+      console.warn('Firebase保存失敗:',err&&err.message?err.message:err);
+      if(cb)cb(false);
+    });
+}
+function deleteTaskFromDB(id,cb){
+  db.collection('tasks').doc(id).delete()
+    .then(function(){if(cb)cb(true);})
+    .catch(function(err){console.warn('削除失敗:',err);if(cb)cb(false);});
+}
   var facs=getFacs(),staff=getStaff(),ress=getRes();
   var fac=facs.find(function(f){return f.id===t.fid;});
   var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
@@ -801,6 +854,7 @@ function saveFac(){
   if(_editFacId){facs=facs.map(function(f){return f.id===_editFacId?Object.assign({},f,{name:name}):f;});}
   else{facs.push({id:uid(),name:name,order:facs.length});}
   ST.set(K.fac,facs);
+  saveSettingsToDB();
   closeOv('ov-fac'); renderFac(); renderSettings();
 }
 function delFac(facId){
@@ -849,6 +903,7 @@ function saveStaff(){
   if(_editStaffId){staff=staff.map(function(s){return s.id===_editStaffId?Object.assign({},s,{name:name}):s;});}
   else{staff.push({id:uid(),name:name,order:staff.length});}
   ST.set(K.staff,staff);
+  saveSettingsToDB();
   closeOv('ov-staff'); renderStaff(); renderSettings();
 }
 function delStaff(staffId){
@@ -905,6 +960,7 @@ function saveRes(){
   if(_editResId){ress=ress.map(function(r){return r.id===_editResId?Object.assign({},r,{name:name,fid:fid}):r;});}
   else{ress.push({id:uid(),name:name,fid:fid,order:ress.length});}
   ST.set(K.res,ress);
+  saveSettingsToDB();
   closeOv('ov-res'); renderRes(); renderSettings();
 }
 function delRes(resId){
@@ -1031,7 +1087,10 @@ function initButtons(){
 document.addEventListener('DOMContentLoaded',function(){
   initData();
   initButtons();
-  renderHome();
+  // Firebaseから設定を取得してからホームを描画
+  fetchSettingsFromDB(function(){
+    renderHome();
+  });
 });
 
 })();
