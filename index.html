@@ -90,6 +90,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .fi,.fs,.fta{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:14px;font-family:inherit;color:var(--tx);background:var(--bg);outline:none;transition:border-color .15s;}
 .fi:focus,.fs:focus,.fta:focus{border-color:var(--acc);background:#fff;}
 .fta{min-height:90px;resize:none;line-height:1.6;}
+.fta-sm{min-height:60px;}
 .dw{position:relative;}
 .dd{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:14px;color:var(--tx);background:var(--bg);min-height:44px;pointer-events:none;}
 .dd .sun{color:#e05555;font-weight:700;}.dd .sat{color:#4a90c4;font-weight:700;}.dd .wk{color:var(--txs);font-weight:700;}
@@ -148,13 +149,13 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-item{background:var(--card);border-radius:var(--r);border:1px solid var(--bdr);box-shadow:var(--sh);padding:14px 16px;margin-bottom:10px;cursor:pointer;border-left:3px solid var(--acc);}
 .tl-item.stodo{border-left-color:#3a5fc8}.tl-item.swip{border-left-color:var(--amb)}.tl-item.sdone{border-left-color:var(--grn)}
 .tl-item:active{opacity:.8;}
-.tl-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.tl-who{font-size:13px;font-weight:700;color:var(--navy);flex:1;}
-.tl-fac{font-size:11px;color:var(--txm);background:var(--bg);padding:2px 8px;border-radius:10px;border:1px solid var(--bdr);}
+.tl-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.tl-who{font-size:13px;font-weight:700;color:var(--navy);flex:1;min-width:0;}
+.tl-fac{font-size:11px;color:var(--txm);background:var(--bg);padding:2px 8px;border-radius:10px;border:1px solid var(--bdr);flex-shrink:0;}
 .tl-txt{font-size:13px;color:var(--tx);line-height:1.6;word-break:break-all;}
+.tl-prog{font-size:12px;color:var(--txs);margin-top:4px;line-height:1.5;}
 .tl-empty{padding:60px 20px;text-align:center;color:var(--txm);font-size:13px;}
 
-/* カレンダー */
 .cal-main{display:flex;flex-direction:column;flex:1;overflow:hidden;}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--bdr);flex-shrink:0;}
 .cal-nav-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--navyp);color:var(--navy);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
@@ -283,7 +284,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
         <span class="sarr">›</span>
       </div>
     </div>
-    <div style="text-align:center;margin-top:32px;font-size:11px;color:var(--txm);">ゆりいか タスク管理 v2.0</div>
+    <div style="text-align:center;margin-top:32px;font-size:11px;color:var(--txm);">ゆりいか タスク管理 v3.0</div>
   </div>
   <nav class="bbar">
     <button class="bitem" id="bar-home3"><span class="bic">📋</span>タスク</button>
@@ -372,7 +373,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
       </select>
     </div>
     <div class="fg"><label class="fl">期日（任意）</label>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px;">
         <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
           <input type="radio" name="due-type" id="due-type-date" value="date" checked> 日付指定
         </label>
@@ -386,7 +387,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
       </div>
     </div>
     <div class="fg"><label class="fl">進捗状況（任意）</label>
-      <textarea class="fta" id="t-progress" placeholder="進捗状況を入力…" style="min-height:60px;"></textarea>
+      <textarea class="fta fta-sm" id="t-progress" placeholder="進捗状況を入力…"></textarea>
     </div>
     <div class="mact">
       <button class="bcnl" id="task-cnl">キャンセル</button>
@@ -467,7 +468,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 'use strict';
 
 /* Firebase */
-var FB = firebase.initializeApp({
+firebase.initializeApp({
   apiKey: "AIzaSyB-D90f-72b0lV2g0Ue6yc3-o30MBn6v0w",
   authDomain: "task-6e73b.firebaseapp.com",
   projectId: "task-6e73b",
@@ -481,13 +482,8 @@ function setDbStatus(ok) {
   var dot = document.getElementById('db-dot');
   var lbl = document.getElementById('db-lbl');
   if (!dot || !lbl) return;
-  if (ok) {
-    dot.className = 'db-dot on';
-    lbl.textContent = 'データベース接続済み';
-  } else {
-    dot.className = 'db-dot off';
-    lbl.textContent = 'オフライン動作中';
-  }
+  dot.className = ok ? 'db-dot on' : 'db-dot off';
+  lbl.textContent = ok ? 'データベース接続済み' : 'オフライン動作中';
 }
 
 /* ローカルストレージ */
@@ -511,24 +507,19 @@ function initData() {
   if (!ST.get(K.task))  ST.set(K.task, []);
 }
 
-function getFacs()  { return (ST.get(K.fac)   || []).sort(function(a,b){ return a.order - b.order; }); }
-function getStaff() { return (ST.get(K.staff)  || []).sort(function(a,b){ return (a.order||0) - (b.order||0); }); }
-function getRes()   { return (ST.get(K.res)    || []).sort(function(a,b){ return (a.order||0) - (b.order||0); }); }
-function getTasks() { return ST.get(K.task)    || []; }
+function getFacs()  { return (ST.get(K.fac)  || []).sort(function(a,b){ return a.order - b.order; }); }
+function getStaff() { return (ST.get(K.staff) || []).sort(function(a,b){ return (a.order||0) - (b.order||0); }); }
+function getRes()   { return (ST.get(K.res)   || []).sort(function(a,b){ return (a.order||0) - (b.order||0); }); }
+function getTasks() { return ST.get(K.task)   || []; }
 
 /* Firebase: 設定取得 */
 function fetchSettings(cb) {
   var done = false;
-  var timer = setTimeout(function() {
-    if (done) return;
-    done = true;
-    if (cb) cb();
-  }, 5000);
+  var timer = setTimeout(function() { if (!done) { done = true; if (cb) cb(); } }, 5000);
   db.collection('settings').doc('data').get()
     .then(function(doc) {
       if (done) return;
-      done = true;
-      clearTimeout(timer);
+      done = true; clearTimeout(timer);
       if (doc.exists) {
         var d = doc.data();
         if (d.fac   && d.fac.length)   ST.set(K.fac,   d.fac);
@@ -537,21 +528,14 @@ function fetchSettings(cb) {
       }
       if (cb) cb();
     })
-    .catch(function() {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      if (cb) cb();
-    });
+    .catch(function() { if (!done) { done = true; clearTimeout(timer); if (cb) cb(); } });
 }
 
 /* Firebase: 設定保存 */
 function saveSettings() {
   db.collection('settings').doc('data').set({
-    fac:   getFacs(),
-    staff: getStaff(),
-    res:   getRes()
-  }).catch(function(err) { console.warn('設定保存失敗', err); });
+    fac: getFacs(), staff: getStaff(), res: getRes()
+  }).catch(function(e) { console.warn('設定保存失敗', e); });
 }
 
 /* Firebase: タスク取得 */
@@ -564,15 +548,15 @@ function fetchTasks(cb) {
       setDbStatus(true);
       if (cb) cb(tasks);
     })
-    .catch(function(err) {
-      console.warn('タスク取得失敗', err);
+    .catch(function(e) {
+      console.warn('タスク取得失敗', e);
       setDbStatus(false);
       if (cb) cb(getTasks());
     });
 }
 
 /* Firebase: タスク保存 */
-function saveTask(t) {
+function saveTaskDB(t) {
   var fac   = getFacs().find(function(f)  { return f.id === t.fid; });
   var staff = t.staffId ? getStaff().find(function(s) { return s.id === t.staffId; }) : null;
   var res   = t.resId   ? getRes().find(function(r)   { return r.id === t.resId; })   : null;
@@ -589,15 +573,14 @@ function saveTask(t) {
     staffId:   t.staffId   || '',
     staffName: staff       ? staff.name : '',
     createdAt: t.createdAt || new Date().toISOString()
-  })
-  .then(function() { setDbStatus(true); })
-  .catch(function(err) { console.warn('タスク保存失敗', err); });
+  }).then(function() { setDbStatus(true); })
+    .catch(function(e) { console.warn('タスク保存失敗', e); });
 }
 
 /* Firebase: タスク削除 */
-function deleteTask(id) {
+function deleteTaskDB(id) {
   db.collection('tasks').doc(id).delete()
-    .catch(function(err) { console.warn('タスク削除失敗', err); });
+    .catch(function(e) { console.warn('タスク削除失敗', e); });
 }
 
 /* ユーティリティ */
@@ -609,39 +592,47 @@ function todayStr() { var d = new Date(); return d.getFullYear()+'-'+pad(d.getMo
 function fmtD(s) {
   if (!s) return '';
   var p = s.split('-');
-  var d = new Date(s + 'T00:00:00');
-  return parseInt(p[1]) + '月' + parseInt(p[2]) + '日（' + DOW[d.getDay()] + '）';
+  var d = new Date(s+'T00:00:00');
+  return parseInt(p[1])+'月'+parseInt(p[2])+'日（'+DOW[d.getDay()]+'）';
 }
 function fmtDFull(s) {
-  var d = new Date(s + 'T00:00:00');
-  return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日（' + DOW[d.getDay()] + '）';
+  var d = new Date(s+'T00:00:00');
+  return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）';
 }
-function tL(t)   { return {todo:'未着手', wip:'対応中', done:'対応済み'}[t] || t; }
-function tC(t)   { return {todo:'ttodo',  wip:'twip',   done:'tdone'}[t]   || 'ttodo'; }
+function tL(t) { return {todo:'未着手', wip:'対応中', done:'対応済み'}[t] || t; }
+function tC(t) { return {todo:'ttodo',  wip:'twip',   done:'tdone'}[t]   || 'ttodo'; }
+
 function updateDD() {
   var v = document.getElementById('t-date').value;
   var el = document.getElementById('t-date-disp');
   if (!v) { el.textContent = ''; return; }
-  var d = new Date(v + 'T00:00:00'), dow = d.getDay();
+  var d = new Date(v+'T00:00:00'), dow = d.getDay();
   var p = v.split('-');
   var cls = dow===0 ? 'sun' : dow===6 ? 'sat' : 'wk';
-  el.innerHTML = esc(p[0]+'/'+p[1]+'/'+p[2]) + '<span class="'+cls+'">（'+DOW[dow]+'）</span>';
+  el.innerHTML = esc(p[0]+'/'+p[1]+'/'+p[2])+'<span class="'+cls+'">（'+DOW[dow]+'）</span>';
 }
+function updateDueDisp() {
+  var v = document.getElementById('t-due').value;
+  var el = document.getElementById('t-due-disp');
+  if (!v) { el.textContent = ''; return; }
+  var d = new Date(v+'T00:00:00'), dow = d.getDay();
+  var p = v.split('-');
+  var cls = dow===0 ? 'sun' : dow===6 ? 'sat' : 'wk';
+  el.innerHTML = esc(p[0]+'/'+p[1]+'/'+p[2])+'<span class="'+cls+'">（'+DOW[dow]+'）</span>';
+}
+function onDueTypeChange() {
+  var isDate = document.getElementById('due-type-date').checked;
+  document.getElementById('due-date-wrap').style.display = isDate ? '' : 'none';
+}
+
 var ICONS = ['c0','c1','c2','c3','c4','c5'];
 
 /* ページ切り替え */
 function showPage(id) {
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
-  var fn = {
-    'pg-home':    renderHome,
-    'pg-tl':      renderTL,
-    'pg-cal':     renderCal,
-    'pg-settings':renderSettings,
-    'pg-fac':     renderFac,
-    'pg-staff':   renderStaff,
-    'pg-res':     renderRes
-  }[id];
+  var fn = { 'pg-home':renderHome, 'pg-tl':renderTL, 'pg-cal':renderCal,
+             'pg-settings':renderSettings, 'pg-fac':renderFac, 'pg-staff':renderStaff, 'pg-res':renderRes }[id];
   if (fn) fn();
 }
 
@@ -649,11 +640,7 @@ function showPage(id) {
 function openOv(id)  { document.getElementById(id).classList.add('open'); }
 function closeOv(id) { document.getElementById(id).classList.remove('open'); }
 var _cfmCb = null;
-function confirm2(msg, cb) {
-  document.getElementById('cfm-msg').textContent = msg;
-  _cfmCb = cb;
-  openOv('ov-cfm');
-}
+function confirm2(msg, cb) { document.getElementById('cfm-msg').textContent = msg; _cfmCb = cb; openOv('ov-cfm'); }
 
 /* トップ */
 function renderHome() {
@@ -666,7 +653,7 @@ function renderHome() {
 
 function drawHome(cont, tasks) {
   var active = tasks.filter(function(t) { return t.tag !== 'done'; }).length;
-  document.getElementById('taskSumm').textContent = '未完了 ' + active + '件';
+  document.getElementById('taskSumm').textContent = '未完了 '+active+'件';
   var facs = getFacs(), staff = getStaff(), ress = getRes();
   cont.innerHTML = '';
   facs.forEach(function(fac, fi) {
@@ -726,24 +713,25 @@ function renderTL() {
   });
   body.innerHTML = order.map(function(date) {
     var items = groups[date].map(function(t) {
-      var fac  = facs.find(function(f)  { return f.id === t.fid; });
-      var s    = t.staffId ? staff.find(function(x) { return x.id === t.staffId; }) : null;
-      var r    = t.resId   ? ress.find(function(x)  { return x.id === t.resId; })   : null;
-      var sN   = s ? s.name : (t.staffName || '');
-      var rN   = r ? r.name : (t.resName   || '');
-      var who  = rN ? rN : (fac ? fac.name : '—');
-      var sub  = rN && fac ? fac.name : '';
+      var fac    = facs.find(function(f)  { return f.id === t.fid; });
+      var s      = t.staffId ? staff.find(function(x) { return x.id === t.staffId; }) : null;
+      var r      = t.resId   ? ress.find(function(x)  { return x.id === t.resId; })   : null;
+      var sN     = s ? s.name : (t.staffName || '');
+      var rN     = r ? r.name : (t.resName   || '');
+      var who    = rN ? rN : (fac ? fac.name : '—');
+      var sub    = rN && fac ? fac.name : '';
       var dueStr = t.due ? fmtD(t.due) : '';
       return '<div class="tl-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
         '<div class="tl-hd">' +
           '<div class="tl-who">'+esc(who)+
-            (sub ? ' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(sub)+'</span>' : '')+
+            (sub    ? ' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(sub)+'</span>' : '')+
             (dueStr ? ' <span style="font-size:11px;font-weight:400;color:var(--acc);">/ '+esc(dueStr)+'</span>' : '')+
           '</div>' +
-          (sN  ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
+          (sN ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
         '</div>' +
         '<div class="tl-txt">'+esc(t.text)+'</div>' +
+        (t.progress ? '<div class="tl-prog">📝 '+esc(t.progress)+'</div>' : '') +
       '</div>';
     }).join('');
     return '<div class="tl-day"><div class="tl-dlbl"><span class="tl-dtxt">'+fmtDFull(date)+'</span></div>'+items+'</div>';
@@ -751,61 +739,51 @@ function renderTL() {
 }
 
 /* カレンダー */
-var _calY = new Date().getFullYear();
-var _calM = new Date().getMonth();
+var _calY   = new Date().getFullYear();
+var _calM   = new Date().getMonth();
 var _calSel = null;
 
 function renderCal() {
   var today = new Date();
   var tasks = getTasks();
-  document.getElementById('cal-month-lbl').textContent = _calY + '年' + (_calM+1) + '月';
-
-  // 期日ごとにタスクをマップ
+  document.getElementById('cal-month-lbl').textContent = _calY+'年'+(_calM+1)+'月';
   var dueMap = {};
   tasks.forEach(function(t) {
     if (!t.due) return;
     if (!dueMap[t.due]) dueMap[t.due] = [];
     dueMap[t.due].push(t);
   });
-
   var first = new Date(_calY, _calM, 1).getDay();
   var last  = new Date(_calY, _calM+1, 0).getDate();
   var DOWL  = ['日','月','火','水','木','金','土'];
   var html  = DOWL.map(function(d,i) {
-    return '<div class="cal-dow'+(i===0?' sun':i===6?' sat':'')+'">' + d + '</div>';
+    return '<div class="cal-dow'+(i===0?' sun':i===6?' sat':'')+'">' +d+'</div>';
   }).join('');
-
-  // 前月の空白
   for (var i = 0; i < first; i++) {
     html += '<div class="cal-day other"><div class="cal-dn"></div></div>';
   }
-
-  // 今月の日付
   for (var d = 1; d <= last; d++) {
-    var ds  = _calY + '-' + pad(_calM+1) + '-' + pad(d);
-    var dow = new Date(_calY, _calM, d).getDay();
-    var isToday  = (_calY===today.getFullYear() && _calM===today.getMonth() && d===today.getDate());
-    var isSel    = _calSel === ds;
-    var dt       = dueMap[ds] || [];
-    var dnCls    = 'cal-dn' + (dow===0?' sun':dow===6?' sat':'');
-    var dayCls   = 'cal-day' + (isToday?' today':'') + (isSel?' selected':'');
-    var dots     = dt.slice(0,4).map(function(t) {
-      var c = t.tag==='done' ? '#4caf7d' : t.tag==='wip' ? '#f0a030' : '#3a5fc8';
+    var ds   = _calY+'-'+pad(_calM+1)+'-'+pad(d);
+    var dow  = new Date(_calY, _calM, d).getDay();
+    var isT  = (_calY===today.getFullYear() && _calM===today.getMonth() && d===today.getDate());
+    var isS  = _calSel === ds;
+    var dt   = dueMap[ds] || [];
+    var dnC  = 'cal-dn'+(dow===0?' sun':dow===6?' sat':'');
+    var dayC = 'cal-day'+(isT?' today':'')+(isS?' selected':'');
+    var dots = dt.slice(0,4).map(function(t) {
+      var c = t.tag==='done'?'#4caf7d':t.tag==='wip'?'#f0a030':'#3a5fc8';
       return '<div class="cal-dot" style="background:'+c+'"></div>';
     }).join('');
-    html += '<div class="'+dayCls+'" data-action="cal-day" data-date="'+ds+'">' +
-      '<div class="'+dnCls+'">'+d+'</div>' +
+    html += '<div class="'+dayC+'" data-action="cal-day" data-date="'+ds+'">' +
+      '<div class="'+dnC+'">'+d+'</div>' +
       (dots ? '<div class="cal-dots">'+dots+'</div>' : '') +
     '</div>';
   }
-
-  // 翌月の空白
   var total = first + last;
-  var rem = total % 7 ? 7 - (total%7) : 0;
+  var rem = total%7 ? 7-(total%7) : 0;
   for (var n = 1; n <= rem; n++) {
     html += '<div class="cal-day other"><div class="cal-dn"></div></div>';
   }
-
   document.getElementById('cal-grid').innerHTML = html;
   renderCalSel(dueMap);
 }
@@ -814,13 +792,14 @@ function renderCalSel(dueMap) {
   var el = document.getElementById('cal-sel');
   if (!_calSel) { el.innerHTML = '<div class="cal-empty">日付をタップすると期日のタスクが表示されます</div>'; return; }
   var facs = getFacs(), staff = getStaff(), ress = getRes();
-  var dt = (dueMap || {})[_calSel] || getTasks().filter(function(t){ return t.due===_calSel; });
-  var d  = new Date(_calSel+'T00:00:00');
+  var dm   = dueMap || {};
+  var dt   = dm[_calSel] || getTasks().filter(function(t) { return t.due === _calSel; });
+  var d    = new Date(_calSel+'T00:00:00');
   el.innerHTML = '<div class="cal-sel-lbl">📅 '+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）の期日タスク</div>' +
     (dt.length ? dt.map(function(t) {
-      var fac = facs.find(function(f){ return f.id===t.fid; });
-      var s   = t.staffId ? staff.find(function(x){ return x.id===t.staffId; }) : null;
-      var r   = t.resId   ? ress.find(function(x){ return x.id===t.resId; })   : null;
+      var fac = facs.find(function(f) { return f.id===t.fid; });
+      var s   = t.staffId ? staff.find(function(x) { return x.id===t.staffId; }) : null;
+      var r   = t.resId   ? ress.find(function(x)  { return x.id===t.resId; })   : null;
       var sN  = s ? s.name : (t.staffName||'');
       var rN  = r ? r.name : (t.resName||'');
       return '<div class="cal-task-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
@@ -835,20 +814,7 @@ function renderCalSel(dueMap) {
     }).join('') : '<div class="cal-empty">この日の期日タスクはありません</div>');
 }
 
-/* 期日表示 */
-function updateDueDisp() {
-  var v = document.getElementById('t-due').value;
-  var el = document.getElementById('t-due-disp');
-  if (!v) { el.textContent = ''; return; }
-  var d = new Date(v+'T00:00:00'), dow = d.getDay();
-  var p = v.split('-');
-  var cls = dow===0 ? 'sun' : dow===6 ? 'sat' : 'wk';
-  el.innerHTML = esc(p[0]+'/'+p[1]+'/'+p[2])+'<span class="'+cls+'">（'+DOW[dow]+'）</span>';
-}
-function onDueTypeChange() {
-  var isDate = document.getElementById('due-type-date').checked;
-  document.getElementById('due-date-wrap').style.display = isDate ? '' : 'none';
-}
+/* タスクモーダル */
 var _editId = null;
 function openTaskModal(facId) {
   _editId = null;
@@ -871,6 +837,7 @@ function openTaskModal(facId) {
   openOv('ov-task');
   setTimeout(function() { document.getElementById('t-txt').focus(); }, 350);
 }
+
 function openTaskModalFromCal() {
   openTaskModal(null);
   if (_calSel) {
@@ -882,6 +849,7 @@ function openTaskModalFromCal() {
     }, 50);
   }
 }
+
 function updateResSelect(facId, selId) {
   var ress = getRes().filter(function(r) { return r.fid === facId; });
   document.getElementById('t-res').innerHTML = '<option value="">なし</option>' +
@@ -891,15 +859,15 @@ function updateStaffSelect(selId) {
   document.getElementById('t-staff').innerHTML = '<option value="">未定</option>' +
     getStaff().map(function(s) { return '<option value="'+s.id+'"'+(s.id===selId?' selected':'')+'>'+esc(s.name)+'</option>'; }).join('');
 }
+
 function doSaveTask() {
   var txt = document.getElementById('t-txt').value.trim();
   if (!txt) { alert('内容を入力してください'); return; }
-  var tasks = getTasks();
   var isDueDate = document.getElementById('due-type-date').checked;
   var t = {
     id:        _editId || uid(),
     fid:       document.getElementById('t-fac').value,
-    resId:     document.getElementById('t-res').value || null,
+    resId:     document.getElementById('t-res').value   || null,
     date:      document.getElementById('t-date').value,
     due:       isDueDate ? (document.getElementById('t-due').value || null) : null,
     text:      txt,
@@ -908,6 +876,7 @@ function doSaveTask() {
     staffId:   document.getElementById('t-staff').value || null,
     createdAt: new Date().toISOString()
   };
+  var tasks = getTasks();
   if (_editId) {
     var i = tasks.findIndex(function(x) { return x.id === _editId; });
     if (i >= 0) tasks[i] = t; else tasks.push(t);
@@ -915,7 +884,7 @@ function doSaveTask() {
   ST.set(K.task, tasks);
   closeOv('ov-task');
   renderHome();
-  saveTask(t);
+  saveTaskDB(t);
 }
 
 /* 詳細モーダル */
@@ -924,20 +893,21 @@ function openDetail(id) {
   var t = getTasks().find(function(x) { return x.id === id; });
   if (!t) return;
   _detailId = id;
-  var fac   = getFacs().find(function(f)  { return f.id === t.fid; });
-  var s     = t.staffId ? getStaff().find(function(x) { return x.id === t.staffId; }) : null;
-  var r     = t.resId   ? getRes().find(function(x)   { return x.id === t.resId; })   : null;
+  var fac = getFacs().find(function(f)  { return f.id === t.fid; });
+  var s   = t.staffId ? getStaff().find(function(x) { return x.id === t.staffId; }) : null;
+  var r   = t.resId   ? getRes().find(function(x)   { return x.id === t.resId; })   : null;
   document.getElementById('detail-ttl').textContent = fac ? fac.name : '';
   document.getElementById('detail-body').textContent =
     fmtDFull(t.date) +
     '\nステータス：' + tL(t.tag) +
-    (r  ? '\n利用者：' + r.name  : '') +
-    (s  ? '\n対応者：' + s.name  : '') +
+    (r ? '\n利用者：'  + r.name : '') +
+    (s ? '\n対応者：'  + s.name : '') +
     (t.due ? '\n期日：' + fmtD(t.due) : '\n期日：未定') +
     (t.progress ? '\n進捗：' + t.progress : '') +
     '\n\n' + t.text;
   openOv('ov-detail');
 }
+
 function openEditTask() {
   var t = getTasks().find(function(x) { return x.id === _detailId; });
   if (!t) return;
@@ -949,6 +919,7 @@ function openEditTask() {
   document.getElementById('t-txt').value = t.text;
   document.getElementById('t-tag').value = t.tag;
   document.getElementById('t-progress').value = t.progress || '';
+  if (t.due) {
     document.getElementById('due-type-date').checked = true;
     document.getElementById('due-date-wrap').style.display = '';
     document.getElementById('t-due').value = t.due;
@@ -1013,18 +984,16 @@ function doSaveFac() {
   var facs = getFacs();
   if (_eFacId) { facs = facs.map(function(f) { return f.id===_eFacId ? Object.assign({},f,{name:name}) : f; }); }
   else { facs.push({id:uid(), name:name, order:facs.length}); }
-  ST.set(K.fac, facs);
-  saveSettings();
+  ST.set(K.fac, facs); saveSettings();
   closeOv('ov-fac'); renderFac(); renderSettings();
 }
 function delFac(facId) {
   var cnt = getTasks().filter(function(t) { return t.fid===facId; }).length;
-  confirm2(cnt ? 'この施設を削除するとタスク '+cnt+'件も削除されます。\n本当に削除しますか？' : 'この施設を削除しますか？', function() {
+  confirm2(cnt?'この施設を削除するとタスク '+cnt+'件も削除されます。\n本当に削除しますか？':'この施設を削除しますか？', function() {
     ST.set(K.fac,  getFacs().filter(function(f) { return f.id!==facId; }));
     ST.set(K.res,  getRes().filter(function(r)   { return r.fid!==facId; }));
     ST.set(K.task, getTasks().filter(function(t) { return t.fid!==facId; }));
-    saveSettings();
-    renderFac(); renderSettings();
+    saveSettings(); renderFac(); renderSettings();
   });
 }
 
@@ -1064,8 +1033,7 @@ function doSaveStaff() {
   var staff = getStaff();
   if (_eStaffId) { staff = staff.map(function(s) { return s.id===_eStaffId ? Object.assign({},s,{name:name}) : s; }); }
   else { staff.push({id:uid(), name:name, order:staff.length}); }
-  ST.set(K.staff, staff);
-  saveSettings();
+  ST.set(K.staff, staff); saveSettings();
   closeOv('ov-staff'); renderStaff(); renderSettings();
 }
 function delStaff(staffId) {
@@ -1073,8 +1041,7 @@ function delStaff(staffId) {
   if (!s) return;
   confirm2('「'+s.name+'」を削除しますか？', function() {
     ST.set(K.staff, getStaff().filter(function(x) { return x.id!==staffId; }));
-    saveSettings();
-    renderStaff(); renderSettings();
+    saveSettings(); renderStaff(); renderSettings();
   });
 }
 
@@ -1123,8 +1090,7 @@ function doSaveRes() {
   var ress = getRes();
   if (_eResId) { ress = ress.map(function(r) { return r.id===_eResId ? Object.assign({},r,{name:name,fid:fid}) : r; }); }
   else { ress.push({id:uid(), name:name, fid:fid, order:ress.length}); }
-  ST.set(K.res, ress);
-  saveSettings();
+  ST.set(K.res, ress); saveSettings();
   closeOv('ov-res'); renderRes(); renderSettings();
 }
 function delRes(resId) {
@@ -1132,8 +1098,7 @@ function delRes(resId) {
   if (!r) return;
   confirm2('「'+r.name+'」を削除しますか？', function() {
     ST.set(K.res, getRes().filter(function(x) { return x.id!==resId; }));
-    saveSettings();
-    renderRes(); renderSettings();
+    saveSettings(); renderRes(); renderSettings();
   });
 }
 
@@ -1202,10 +1167,10 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('change', function(e) {
-  if (e.target.id==='t-fac')           { updateResSelect(e.target.value, null); }
-  if (e.target.id==='t-date')          { updateDD(); }
-  if (e.target.id==='t-due')           { updateDueDisp(); }
-  if (e.target.name==='due-type')      { onDueTypeChange(); }
+  if (e.target.id==='t-fac')       { updateResSelect(e.target.value, null); }
+  if (e.target.id==='t-date')      { updateDD(); }
+  if (e.target.id==='t-due')       { updateDueDisp(); }
+  if (e.target.name==='due-type')  { onDueTypeChange(); }
 });
 
 /* ボタン登録 */
@@ -1213,31 +1178,24 @@ function initButtons() {
   function go(id, pg) { var el = document.getElementById(id); if (el) el.onclick = function(){ showPage(pg); }; }
   go('btn-cfg1','pg-settings');    go('btn-cfg-tl','pg-settings');   go('btn-cfg-cal','pg-settings');
   go('btn-cfg-back','pg-home');
-  go('bar-home1','pg-home');       go('bar-home2','pg-home');
-  go('bar-home3','pg-home');       go('bar-home4','pg-home');
-  go('bar-home5','pg-home');       go('bar-home6','pg-home');
+  go('bar-home1','pg-home');       go('bar-home2','pg-home');        go('bar-home3','pg-home');
+  go('bar-home4','pg-home');       go('bar-home5','pg-home');        go('bar-home6','pg-home');
   go('bar-home7','pg-home');
-  go('bar-tl1','pg-tl');           go('bar-tl3','pg-tl');
-  go('bar-tl4','pg-tl');           go('bar-tl5','pg-tl');
-  go('bar-tl6','pg-tl');           go('bar-tl7','pg-tl');
-  go('bar-cal1','pg-cal');         go('bar-cal2','pg-cal');
-  go('bar-cal3','pg-cal');         go('bar-cal4','pg-cal');
-  go('bar-cal5','pg-cal');         go('bar-cal6','pg-cal');
+  go('bar-tl1','pg-tl');           go('bar-tl3','pg-tl');            go('bar-tl4','pg-tl');
+  go('bar-tl5','pg-tl');           go('bar-tl6','pg-tl');            go('bar-tl7','pg-tl');
+  go('bar-cal1','pg-cal');         go('bar-cal2','pg-cal');          go('bar-cal3','pg-cal');
+  go('bar-cal4','pg-cal');         go('bar-cal5','pg-cal');          go('bar-cal6','pg-cal');
   go('btn-to-fac','pg-fac');       go('btn-fac-back','pg-settings');
   go('btn-to-staff','pg-staff');   go('btn-staff-back','pg-settings');
   go('btn-to-res','pg-res');       go('btn-res-back','pg-settings');
-  document.getElementById('btn-add-fac').onclick   = function(){ openFacModal(null); };
+  document.getElementById('btn-add-fac').onclick    = function(){ openFacModal(null); };
   document.getElementById('btn-add-staff').onclick  = function(){ openStaffModal(null); };
   document.getElementById('btn-add-res').onclick    = function(){ openResModal(null); };
-  document.getElementById('fab-add').onclick    = function(){ openTaskModal(null); };
-  document.getElementById('fab-cal-add').onclick = function(){ openTaskModalFromCal(); };
-  document.getElementById('cal-prev').onclick = function(){
-    _calM--; if(_calM<0){_calM=11;_calY--;} renderCal();
-  };
-  document.getElementById('cal-next').onclick = function(){
-    _calM++; if(_calM>11){_calM=0;_calY++;} renderCal();
-  };
-  document.getElementById('task-cnl').onclick = function(){ closeOv('ov-task'); };
+  document.getElementById('fab-add').onclick        = function(){ openTaskModal(null); };
+  document.getElementById('fab-cal-add').onclick    = function(){ openTaskModalFromCal(); };
+  document.getElementById('cal-prev').onclick       = function(){ _calM--; if(_calM<0){_calM=11;_calY--;} renderCal(); };
+  document.getElementById('cal-next').onclick       = function(){ _calM++; if(_calM>11){_calM=0;_calY++;} renderCal(); };
+  document.getElementById('task-cnl').onclick       = function(){ closeOv('ov-task'); };
   document.getElementById('task-sav').onclick       = doSaveTask;
   document.getElementById('fac-cnl').onclick        = function(){ closeOv('ov-fac'); };
   document.getElementById('fac-sav').onclick        = doSaveFac;
@@ -1250,9 +1208,7 @@ function initButtons() {
     confirm2('このタスクを削除しますか？', function(){
       var id = _detailId;
       ST.set(K.task, getTasks().filter(function(t){ return t.id !== id; }));
-      closeOv('ov-detail');
-      renderHome();
-      deleteTask(id);
+      closeOv('ov-detail'); renderHome(); deleteTaskDB(id);
     });
   };
   document.getElementById('cfm-cnl').onclick = function(){ closeOv('ov-cfm'); _cfmCb = null; };
