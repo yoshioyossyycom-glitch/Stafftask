@@ -729,8 +729,7 @@ function renderTL() {
       var who  = rN || sN || (fac ? fac.name : '—');
       return '<div class="tl-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
         '<div class="tl-hd">' +
-          '<div class="tl-who">'+esc(who)+'</div>' +
-          (fac ? '<div class="tl-fac">'+esc(fac.name)+'</div>' : '') +
+          '<div class="tl-who">'+esc(who)+(fac?' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(fac.name)+'</span>':'')+'</div>' +
           (sN  ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
         '</div>' +
