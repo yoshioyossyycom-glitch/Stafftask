@@ -248,6 +248,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
       <div class="cal-sel" id="cal-sel"></div>
     </div>
   </div>
+  <button class="fab" id="fab-cal-add">＋</button>
   <nav class="bbar">
     <button class="bitem" id="bar-home7"><span class="bic">📋</span>タスク</button>
     <button class="bitem" id="bar-tl7"><span class="bic">📰</span>TL</button>
@@ -861,6 +862,17 @@ function openTaskModal(facId) {
   openOv('ov-task');
   setTimeout(function() { document.getElementById('t-txt').focus(); }, 350);
 }
+function openTaskModalFromCal() {
+  openTaskModal(null);
+  if (_calSel) {
+    setTimeout(function() {
+      document.getElementById('due-type-date').checked = true;
+      document.getElementById('due-date-wrap').style.display = '';
+      document.getElementById('t-due').value = _calSel;
+      updateDueDisp();
+    }, 50);
+  }
+}
 function updateResSelect(facId, selId) {
   var ress = getRes().filter(function(r) { return r.fid === facId; });
   document.getElementById('t-res').innerHTML = '<option value="">なし</option>' +
@@ -1207,7 +1219,8 @@ function initButtons() {
   document.getElementById('btn-add-fac').onclick   = function(){ openFacModal(null); };
   document.getElementById('btn-add-staff').onclick  = function(){ openStaffModal(null); };
   document.getElementById('btn-add-res').onclick    = function(){ openResModal(null); };
-  document.getElementById('fab-add').onclick        = function(){ openTaskModal(null); };
+  document.getElementById('fab-add').onclick    = function(){ openTaskModal(null); };
+  document.getElementById('fab-cal-add').onclick = function(){ openTaskModalFromCal(); };
   document.getElementById('cal-prev').onclick = function(){
     _calM--; if(_calM<0){_calM=11;_calY--;} renderCal();
   };
