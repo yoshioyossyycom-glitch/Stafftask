@@ -385,6 +385,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
         <input type="date" class="dhi" id="t-due">
       </div>
     </div>
+    <div class="fg"><label class="fl">進捗状況（任意）</label>
+      <textarea class="fta" id="t-progress" placeholder="進捗状況を入力…" style="min-height:60px;"></textarea>
+    </div>
     <div class="mact">
       <button class="bcnl" id="task-cnl">キャンセル</button>
       <button class="bsav" id="task-sav">保 存</button>
@@ -581,6 +584,7 @@ function saveTask(t) {
     date:      t.date      || '',
     due:       t.due       || '',
     text:      t.text      || '',
+    progress:  t.progress  || '',
     tag:       t.tag       || 'todo',
     staffId:   t.staffId   || '',
     staffName: staff       ? staff.name : '',
@@ -857,6 +861,7 @@ function openTaskModal(facId) {
   document.getElementById('t-due-disp').textContent = '';
   document.getElementById('due-type-date').checked = true;
   document.getElementById('due-date-wrap').style.display = '';
+  document.getElementById('t-progress').value = '';
   var facs = getFacs();
   document.getElementById('t-fac').innerHTML = facs.map(function(f) {
     return '<option value="'+f.id+'"'+(f.id===facId?' selected':'')+'>'+esc(f.name)+'</option>';
@@ -898,6 +903,7 @@ function doSaveTask() {
     date:      document.getElementById('t-date').value,
     due:       isDueDate ? (document.getElementById('t-due').value || null) : null,
     text:      txt,
+    progress:  document.getElementById('t-progress').value.trim() || null,
     tag:       document.getElementById('t-tag').value,
     staffId:   document.getElementById('t-staff').value || null,
     createdAt: new Date().toISOString()
@@ -928,6 +934,7 @@ function openDetail(id) {
     (r  ? '\n利用者：' + r.name  : '') +
     (s  ? '\n対応者：' + s.name  : '') +
     (t.due ? '\n期日：' + fmtD(t.due) : '\n期日：未定') +
+    (t.progress ? '\n進捗：' + t.progress : '') +
     '\n\n' + t.text;
   openOv('ov-detail');
 }
@@ -941,8 +948,7 @@ function openEditTask() {
   updateDD();
   document.getElementById('t-txt').value = t.text;
   document.getElementById('t-tag').value = t.tag;
-  // 期日
-  if (t.due) {
+  document.getElementById('t-progress').value = t.progress || '';
     document.getElementById('due-type-date').checked = true;
     document.getElementById('due-date-wrap').style.display = '';
     document.getElementById('t-due').value = t.due;
