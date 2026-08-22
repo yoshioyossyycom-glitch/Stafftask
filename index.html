@@ -501,15 +501,18 @@ function saveTaskToDB(t,cb){
   var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
   var r=t.resId?ress.find(function(x){return x.id===t.resId;}):null;
   var data={
-    fid:t.fid, facName:fac?fac.name:'',
-    resId:t.resId||null, resName:r?r.name:'',
-    date:t.date, text:t.text, tag:t.tag,
-    staffId:t.staffId||null, staffName:s?s.name:'',
-    createdAt:t.createdAt
+    fid:t.fid||'', facName:fac?fac.name:'',
+    resId:t.resId||'', resName:r?r.name:'',
+    date:t.date||'', text:t.text||'', tag:t.tag||'todo',
+    staffId:t.staffId||'', staffName:s?s.name:'',
+    createdAt:t.createdAt||new Date().toISOString()
   };
   db.collection('tasks').doc(t.id).set(data)
     .then(function(){setDbStatus(true);if(cb)cb(true);})
-    .catch(function(err){console.warn('保存失敗:',err);if(cb)cb(false);});
+    .catch(function(err){
+      console.warn('Firebase保存失敗:',err&&err.message?err.message:err);
+      if(cb)cb(false);
+    });
 }
 function deleteTaskFromDB(id,cb){
   db.collection('tasks').doc(id).delete()
