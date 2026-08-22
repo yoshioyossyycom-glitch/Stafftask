@@ -153,6 +153,34 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-fac{font-size:11px;color:var(--txm);background:var(--bg);padding:2px 8px;border-radius:10px;border:1px solid var(--bdr);}
 .tl-txt{font-size:13px;color:var(--tx);line-height:1.6;word-break:break-all;}
 .tl-empty{padding:60px 20px;text-align:center;color:var(--txm);font-size:13px;}
+
+/* カレンダー */
+.cal-main{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.cal-nav-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--navyp);color:var(--navy);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.cal-nav-btn:active{background:var(--accs);}
+.cal-month{font-size:16px;font-weight:700;color:var(--navy);}
+.cal-scroll{flex:1;overflow-y:auto;padding-bottom:90px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);background:var(--card);}
+.cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--txm);padding:8px 0;border-bottom:1px solid var(--bdr);}
+.cal-dow.sun{color:var(--red);}.cal-dow.sat{color:var(--acc);}
+.cal-day{min-height:58px;padding:4px;border-top:1px solid var(--bg);border-right:1px solid var(--bg);cursor:pointer;transition:background .15s;}
+.cal-day:nth-child(7n){border-right:none;}
+.cal-day:active{background:var(--navyp);}
+.cal-day.other{opacity:.3;}
+.cal-day.today .cal-dn{background:var(--navy);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.cal-day.selected{background:var(--navyp);}
+.cal-dn{font-size:12px;font-weight:500;text-align:center;margin-bottom:2px;color:var(--tx);}
+.cal-dn.sun{color:var(--red);}.cal-dn.sat{color:var(--acc);}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;}
+.cal-dot{width:6px;height:6px;border-radius:50%;}
+.cal-sel{padding:14px 14px 0;}
+.cal-sel-lbl{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;}
+.cal-task-item{background:var(--card);border-radius:var(--rs);border:1px solid var(--bdr);padding:12px 14px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--acc);}
+.cal-task-item.stodo{border-left-color:#3a5fc8}.cal-task-item.swip{border-left-color:var(--amb)}.cal-task-item.sdone{border-left-color:var(--grn)}
+.cal-task-txt{font-size:13px;color:var(--tx);margin-bottom:4px;}
+.cal-task-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.cal-empty{padding:16px 0;text-align:center;font-size:12px;color:var(--txm);}
 </style>
 </head>
 <body>
@@ -177,7 +205,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
   <button class="fab" id="fab-add">＋</button>
   <nav class="bbar">
     <button class="bitem active" id="bar-home1"><span class="bic">📋</span>タスク</button>
-    <button class="bitem" id="bar-tl1"><span class="bic">📰</span>タイムライン</button>
+    <button class="bitem" id="bar-tl1"><span class="bic">📰</span>TL</button>
+    <button class="bitem" id="bar-cal1"><span class="bic">📅</span>カレンダー</button>
   </nav>
 </div>
 
@@ -195,7 +224,34 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
   </div>
   <nav class="bbar">
     <button class="bitem" id="bar-home2"><span class="bic">📋</span>タスク</button>
-    <button class="bitem active"><span class="bic">📰</span>タイムライン</button>
+    <button class="bitem active"><span class="bic">📰</span>TL</button>
+    <button class="bitem" id="bar-cal2"><span class="bic">📅</span>カレンダー</button>
+  </nav>
+</div>
+
+<!-- カレンダー -->
+<div class="page" id="pg-cal">
+  <header class="hd">
+    <div class="hd-top">
+      <div class="hd-title">カレンダー<small>CALENDAR</small></div>
+      <button class="ic-btn" id="btn-cfg-cal">⚙️</button>
+    </div>
+  </header>
+  <div class="cal-main">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="cal-prev">‹</button>
+      <div class="cal-month" id="cal-month-lbl">—</div>
+      <button class="cal-nav-btn" id="cal-next">›</button>
+    </div>
+    <div class="cal-scroll">
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-sel" id="cal-sel"></div>
+    </div>
+  </div>
+  <nav class="bbar">
+    <button class="bitem" id="bar-home7"><span class="bic">📋</span>タスク</button>
+    <button class="bitem" id="bar-tl7"><span class="bic">📰</span>TL</button>
+    <button class="bitem active"><span class="bic">📅</span>カレンダー</button>
   </nav>
 </div>
 
@@ -230,7 +286,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
   </div>
   <nav class="bbar">
     <button class="bitem" id="bar-home3"><span class="bic">📋</span>タスク</button>
-    <button class="bitem" id="bar-tl3"><span class="bic">📰</span>タイムライン</button>
+    <button class="bitem" id="bar-tl3"><span class="bic">📰</span>TL</button>
+    <button class="bitem" id="bar-cal3"><span class="bic">📅</span>カレンダー</button>
   </nav>
 </div>
 
@@ -249,7 +306,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
   </div>
   <nav class="bbar">
     <button class="bitem" id="bar-home4"><span class="bic">📋</span>タスク</button>
-    <button class="bitem" id="bar-tl4"><span class="bic">📰</span>タイムライン</button>
+    <button class="bitem" id="bar-tl4"><span class="bic">📰</span>TL</button>
+    <button class="bitem" id="bar-cal4"><span class="bic">📅</span>カレンダー</button>
   </nav>
 </div>
 
@@ -268,7 +326,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
   </div>
   <nav class="bbar">
     <button class="bitem" id="bar-home5"><span class="bic">📋</span>タスク</button>
-    <button class="bitem" id="bar-tl5"><span class="bic">📰</span>タイムライン</button>
+    <button class="bitem" id="bar-tl5"><span class="bic">📰</span>TL</button>
+    <button class="bitem" id="bar-cal5"><span class="bic">📅</span>カレンダー</button>
   </nav>
 </div>
 
@@ -287,7 +346,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
   </div>
   <nav class="bbar">
     <button class="bitem" id="bar-home6"><span class="bic">📋</span>タスク</button>
-    <button class="bitem" id="bar-tl6"><span class="bic">📰</span>タイムライン</button>
+    <button class="bitem" id="bar-tl6"><span class="bic">📰</span>TL</button>
+    <button class="bitem" id="bar-cal6"><span class="bic">📅</span>カレンダー</button>
   </nav>
 </div>
 
@@ -309,6 +369,20 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
         <option value="wip">対応中</option>
         <option value="done">対応済み</option>
       </select>
+    </div>
+    <div class="fg"><label class="fl">期日（任意）</label>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="due-type" id="due-type-date" value="date" checked> 日付指定
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="due-type" id="due-type-none" value="none"> 未定
+        </label>
+      </div>
+      <div class="dw" id="due-date-wrap">
+        <div class="dd" id="t-due-disp"></div>
+        <input type="date" class="dhi" id="t-due">
+      </div>
     </div>
     <div class="mact">
       <button class="bcnl" id="task-cnl">キャンセル</button>
@@ -556,6 +630,7 @@ function showPage(id) {
   var fn = {
     'pg-home':    renderHome,
     'pg-tl':      renderTL,
+    'pg-cal':     renderCal,
     'pg-settings':renderSettings,
     'pg-fac':     renderFac,
     'pg-staff':   renderStaff,
@@ -665,7 +740,105 @@ function renderTL() {
   }).join('');
 }
 
-/* タスクモーダル */
+/* カレンダー */
+var _calY = new Date().getFullYear();
+var _calM = new Date().getMonth();
+var _calSel = null;
+
+function renderCal() {
+  var today = new Date();
+  var tasks = getTasks();
+  document.getElementById('cal-month-lbl').textContent = _calY + '年' + (_calM+1) + '月';
+
+  // 期日ごとにタスクをマップ
+  var dueMap = {};
+  tasks.forEach(function(t) {
+    if (!t.due) return;
+    if (!dueMap[t.due]) dueMap[t.due] = [];
+    dueMap[t.due].push(t);
+  });
+
+  var first = new Date(_calY, _calM, 1).getDay();
+  var last  = new Date(_calY, _calM+1, 0).getDate();
+  var DOWL  = ['日','月','火','水','木','金','土'];
+  var html  = DOWL.map(function(d,i) {
+    return '<div class="cal-dow'+(i===0?' sun':i===6?' sat':'')+'">' + d + '</div>';
+  }).join('');
+
+  // 前月の空白
+  for (var i = 0; i < first; i++) {
+    html += '<div class="cal-day other"><div class="cal-dn"></div></div>';
+  }
+
+  // 今月の日付
+  for (var d = 1; d <= last; d++) {
+    var ds  = _calY + '-' + pad(_calM+1) + '-' + pad(d);
+    var dow = new Date(_calY, _calM, d).getDay();
+    var isToday  = (_calY===today.getFullYear() && _calM===today.getMonth() && d===today.getDate());
+    var isSel    = _calSel === ds;
+    var dt       = dueMap[ds] || [];
+    var dnCls    = 'cal-dn' + (dow===0?' sun':dow===6?' sat':'');
+    var dayCls   = 'cal-day' + (isToday?' today':'') + (isSel?' selected':'');
+    var dots     = dt.slice(0,4).map(function(t) {
+      var c = t.tag==='done' ? '#4caf7d' : t.tag==='wip' ? '#f0a030' : '#3a5fc8';
+      return '<div class="cal-dot" style="background:'+c+'"></div>';
+    }).join('');
+    html += '<div class="'+dayCls+'" data-action="cal-day" data-date="'+ds+'">' +
+      '<div class="'+dnCls+'">'+d+'</div>' +
+      (dots ? '<div class="cal-dots">'+dots+'</div>' : '') +
+    '</div>';
+  }
+
+  // 翌月の空白
+  var total = first + last;
+  var rem = total % 7 ? 7 - (total%7) : 0;
+  for (var n = 1; n <= rem; n++) {
+    html += '<div class="cal-day other"><div class="cal-dn"></div></div>';
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+  renderCalSel(dueMap);
+}
+
+function renderCalSel(dueMap) {
+  var el = document.getElementById('cal-sel');
+  if (!_calSel) { el.innerHTML = '<div class="cal-empty">日付をタップすると期日のタスクが表示されます</div>'; return; }
+  var facs = getFacs(), staff = getStaff(), ress = getRes();
+  var dt = (dueMap || {})[_calSel] || getTasks().filter(function(t){ return t.due===_calSel; });
+  var d  = new Date(_calSel+'T00:00:00');
+  el.innerHTML = '<div class="cal-sel-lbl">📅 '+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）の期日タスク</div>' +
+    (dt.length ? dt.map(function(t) {
+      var fac = facs.find(function(f){ return f.id===t.fid; });
+      var s   = t.staffId ? staff.find(function(x){ return x.id===t.staffId; }) : null;
+      var r   = t.resId   ? ress.find(function(x){ return x.id===t.resId; })   : null;
+      var sN  = s ? s.name : (t.staffName||'');
+      var rN  = r ? r.name : (t.resName||'');
+      return '<div class="cal-task-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
+        '<div class="cal-task-txt">'+esc(t.text)+'</div>' +
+        '<div class="cal-task-meta">' +
+          '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
+          (fac ? '<span style="font-size:10px;color:var(--txm);">'+esc(fac.name)+'</span>' : '') +
+          (rN  ? '<span class="ti-res">'+esc(rN)+'</span>' : '') +
+          (sN  ? '<span class="ti-staff">'+esc(sN)+'</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('') : '<div class="cal-empty">この日の期日タスクはありません</div>');
+}
+
+/* 期日表示 */
+function updateDueDisp() {
+  var v = document.getElementById('t-due').value;
+  var el = document.getElementById('t-due-disp');
+  if (!v) { el.textContent = ''; return; }
+  var d = new Date(v+'T00:00:00'), dow = d.getDay();
+  var p = v.split('-');
+  var cls = dow===0 ? 'sun' : dow===6 ? 'sat' : 'wk';
+  el.innerHTML = esc(p[0]+'/'+p[1]+'/'+p[2])+'<span class="'+cls+'">（'+DOW[dow]+'）</span>';
+}
+function onDueTypeChange() {
+  var isDate = document.getElementById('due-type-date').checked;
+  document.getElementById('due-date-wrap').style.display = isDate ? '' : 'none';
+}
 var _editId = null;
 function openTaskModal(facId) {
   _editId = null;
@@ -674,6 +847,10 @@ function openTaskModal(facId) {
   updateDD();
   document.getElementById('t-txt').value = '';
   document.getElementById('t-tag').value = 'todo';
+  document.getElementById('t-due').value = '';
+  document.getElementById('t-due-disp').textContent = '';
+  document.getElementById('due-type-date').checked = true;
+  document.getElementById('due-date-wrap').style.display = '';
   var facs = getFacs();
   document.getElementById('t-fac').innerHTML = facs.map(function(f) {
     return '<option value="'+f.id+'"'+(f.id===facId?' selected':'')+'>'+esc(f.name)+'</option>';
@@ -696,11 +873,13 @@ function doSaveTask() {
   var txt = document.getElementById('t-txt').value.trim();
   if (!txt) { alert('内容を入力してください'); return; }
   var tasks = getTasks();
+  var isDueDate = document.getElementById('due-type-date').checked;
   var t = {
     id:        _editId || uid(),
     fid:       document.getElementById('t-fac').value,
     resId:     document.getElementById('t-res').value || null,
     date:      document.getElementById('t-date').value,
+    due:       isDueDate ? (document.getElementById('t-due').value || null) : null,
     text:      txt,
     tag:       document.getElementById('t-tag').value,
     staffId:   document.getElementById('t-staff').value || null,
@@ -744,6 +923,18 @@ function openEditTask() {
   updateDD();
   document.getElementById('t-txt').value = t.text;
   document.getElementById('t-tag').value = t.tag;
+  // 期日
+  if (t.due) {
+    document.getElementById('due-type-date').checked = true;
+    document.getElementById('due-date-wrap').style.display = '';
+    document.getElementById('t-due').value = t.due;
+    updateDueDisp();
+  } else {
+    document.getElementById('due-type-none').checked = true;
+    document.getElementById('due-date-wrap').style.display = 'none';
+    document.getElementById('t-due').value = '';
+    document.getElementById('t-due-disp').textContent = '';
+  }
   var facs = getFacs();
   document.getElementById('t-fac').innerHTML = facs.map(function(f) {
     return '<option value="'+f.id+'"'+(f.id===t.fid?' selected':'')+'>'+esc(f.name)+'</option>';
@@ -983,24 +1174,31 @@ document.addEventListener('click', function(e) {
   if (act==='edit-res')   { openResModal(id); return; }
   if (act==='del-res')    { delRes(id); return; }
   if (act==='tl-f')       { _tlF = btn.dataset.fid; renderTL(); return; }
+  if (act==='cal-day')    { _calSel = btn.dataset.date; renderCal(); return; }
 });
 
 document.addEventListener('change', function(e) {
-  if (e.target.id==='t-fac')  { updateResSelect(e.target.value, null); }
-  if (e.target.id==='t-date') { updateDD(); }
+  if (e.target.id==='t-fac')           { updateResSelect(e.target.value, null); }
+  if (e.target.id==='t-date')          { updateDD(); }
+  if (e.target.id==='t-due')           { updateDueDisp(); }
+  if (e.target.name==='due-type')      { onDueTypeChange(); }
 });
 
 /* ボタン登録 */
 function initButtons() {
   function go(id, pg) { var el = document.getElementById(id); if (el) el.onclick = function(){ showPage(pg); }; }
-  go('btn-cfg1','pg-settings');    go('btn-cfg-tl','pg-settings');
+  go('btn-cfg1','pg-settings');    go('btn-cfg-tl','pg-settings');   go('btn-cfg-cal','pg-settings');
   go('btn-cfg-back','pg-home');
   go('bar-home1','pg-home');       go('bar-home2','pg-home');
   go('bar-home3','pg-home');       go('bar-home4','pg-home');
   go('bar-home5','pg-home');       go('bar-home6','pg-home');
+  go('bar-home7','pg-home');
   go('bar-tl1','pg-tl');           go('bar-tl3','pg-tl');
   go('bar-tl4','pg-tl');           go('bar-tl5','pg-tl');
-  go('bar-tl6','pg-tl');
+  go('bar-tl6','pg-tl');           go('bar-tl7','pg-tl');
+  go('bar-cal1','pg-cal');         go('bar-cal2','pg-cal');
+  go('bar-cal3','pg-cal');         go('bar-cal4','pg-cal');
+  go('bar-cal5','pg-cal');         go('bar-cal6','pg-cal');
   go('btn-to-fac','pg-fac');       go('btn-fac-back','pg-settings');
   go('btn-to-staff','pg-staff');   go('btn-staff-back','pg-settings');
   go('btn-to-res','pg-res');       go('btn-res-back','pg-settings');
@@ -1008,7 +1206,13 @@ function initButtons() {
   document.getElementById('btn-add-staff').onclick  = function(){ openStaffModal(null); };
   document.getElementById('btn-add-res').onclick    = function(){ openResModal(null); };
   document.getElementById('fab-add').onclick        = function(){ openTaskModal(null); };
-  document.getElementById('task-cnl').onclick       = function(){ closeOv('ov-task'); };
+  document.getElementById('cal-prev').onclick = function(){
+    _calM--; if(_calM<0){_calM=11;_calY--;} renderCal();
+  };
+  document.getElementById('cal-next').onclick = function(){
+    _calM++; if(_calM>11){_calM=0;_calY++;} renderCal();
+  };
+  document.getElementById('task-cnl').onclick = function(){ closeOv('ov-task'); };
   document.getElementById('task-sav').onclick       = doSaveTask;
   document.getElementById('fac-cnl').onclick        = function(){ closeOv('ov-fac'); };
   document.getElementById('fac-sav').onclick        = doSaveFac;
