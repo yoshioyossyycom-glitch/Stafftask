@@ -655,6 +655,7 @@ function renderTL() {
         '<div class="tl-hd">' +
           '<div class="tl-who">'+esc(who)+'</div>' +
           (fac ? '<div class="tl-fac">'+esc(fac.name)+'</div>' : '') +
+          (sN  ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
         '</div>' +
         '<div class="tl-txt">'+esc(t.text)+'</div>' +
