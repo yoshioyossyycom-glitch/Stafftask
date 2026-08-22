@@ -498,17 +498,26 @@ function fetchTasksFromDB(cb){
 
 // 設定データ（施設・職員・利用者）をFirebaseから取得
 function fetchSettingsFromDB(cb){
+  var done=false;
+  // 5秒タイムアウト
+  var timer=setTimeout(function(){
+    if(!done){ done=true; console.warn('設定取得タイムアウト'); if(cb) cb(); }
+  }, 5000);
   db.collection('settings').doc('data').get()
     .then(function(doc){
+      if(done) return;
+      done=true; clearTimeout(timer);
       if(doc.exists){
         var d=doc.data();
-        if(d.fac&&d.fac.length)   ST.set(K.fac,   d.fac);
+        if(d.fac&&d.fac.length)     ST.set(K.fac,   d.fac);
         if(d.staff&&d.staff.length) ST.set(K.staff, d.staff);
-        if(d.res&&d.res.length)   ST.set(K.res,   d.res);
+        if(d.res&&d.res.length)     ST.set(K.res,   d.res);
       }
       if(cb) cb();
     })
     .catch(function(err){
+      if(done) return;
+      done=true; clearTimeout(timer);
       console.warn('設定取得失敗:',err);
       if(cb) cb();
     });
@@ -1087,7 +1096,9 @@ function initButtons(){
 document.addEventListener('DOMContentLoaded',function(){
   initData();
   initButtons();
-  // Firebaseから設定を取得してからホームを描画
+  // まず先にホームを描画（ローカルデータで表示）
+  renderHome();
+  // バックグラウンドで設定を取得して再描画
   fetchSettingsFromDB(function(){
     renderHome();
   });
