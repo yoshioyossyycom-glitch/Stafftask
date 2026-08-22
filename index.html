@@ -558,28 +558,6 @@ function deleteTaskFromDB(id,cb){
     .then(function(){if(cb)cb(true);})
     .catch(function(err){console.warn('削除失敗:',err);if(cb)cb(false);});
 }
-  var facs=getFacs(),staff=getStaff(),ress=getRes();
-  var fac=facs.find(function(f){return f.id===t.fid;});
-  var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
-  var r=t.resId?ress.find(function(x){return x.id===t.resId;}):null;
-  var data={
-    fid:t.fid||'', facName:fac?fac.name:'',
-    resId:t.resId||'', resName:r?r.name:'',
-    date:t.date||'', text:t.text||'', tag:t.tag||'todo',
-    staffId:t.staffId||'', staffName:s?s.name:'',
-    createdAt:t.createdAt||new Date().toISOString()
-  };
-  db.collection('tasks').doc(t.id).set(data)
-    .then(function(){setDbStatus(true);if(cb)cb(true);})
-    .catch(function(err){
-      console.warn('Firebase保存失敗:',err&&err.message?err.message:err);
-      if(cb)cb(false);
-    });
-}
-function deleteTaskFromDB(id,cb){
-  db.collection('tasks').doc(id).delete()
-    .then(function(){if(cb)cb(true);})
-    .catch(function(err){console.warn('削除失敗:',err);if(cb)cb(false);});
 }
 
 /* ══ ユーティリティ ══ */
@@ -633,49 +611,57 @@ function renderHome(){
   var now=new Date(),dow=now.getDay();
   document.getElementById('todayBadge').textContent=(now.getMonth()+1)+'月'+now.getDate()+'日（'+DOW[dow]+'）';
   var cont=document.getElementById('homeMain');
-  cont.innerHTML='<div style="padding:40px;text-align:center;color:var(--txm);font-size:13px;">📡 読み込み中…</div>';
 
+  // まずローカルキャッシュで即描画
+  var localTasks=getTasks();
+  drawHome(cont, localTasks);
+
+  // Firebaseから最新タスクを取得して更新
   fetchTasksFromDB(function(tasks){
-    var active=tasks.filter(function(t){return t.tag!=='done';}).length;
-    document.getElementById('taskSumm').textContent='未完了 '+active+'件';
-    var facs=getFacs(),staff=getStaff(),ress=getRes();
-    cont.innerHTML='';
-    facs.forEach(function(fac,fi){
-      var facTasks=tasks.filter(function(t){return t.fid===fac.id;});
-      var card=document.createElement('div');
-      card.className='sec-card';
-      var listHTML='<button class="add-s" data-action="add-task" data-fid="'+fac.id+'">＋ タスクを追加</button>';
-      if(facTasks.length){
-        listHTML+=facTasks.map(function(t){
-          var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
-          var r=t.resId?ress.find(function(x){return x.id===t.resId;}):null;
-          var sName=s?s.name:(t.staffName||'');
-          var rName=r?r.name:(t.resName||'');
-          return '<div class="ti" data-action="detail" data-id="'+t.id+'">'+
-            '<div class="ti-body">'+
-              '<div class="ti-txt">'+esc(t.text)+'</div>'+
-              '<div class="ti-meta">'+
-                '<span class="tag '+tagCls(t.tag)+'">'+tagLabel(t.tag)+'</span>'+
-                (rName?'<span class="ti-res">'+esc(rName)+'</span>':'')+
-                (sName?'<span class="ti-assignee">'+esc(sName)+'</span>':'')+
-                '<span class="ti-date">'+fmtD(t.date)+'</span>'+
-              '</div>'+
+    drawHome(cont, tasks);
+  });
+}
+
+function drawHome(cont, tasks){
+  var active=tasks.filter(function(t){return t.tag!=='done';}).length;
+  document.getElementById('taskSumm').textContent='未完了 '+active+'件';
+  var facs=getFacs(),staff=getStaff(),ress=getRes();
+  cont.innerHTML='';
+  facs.forEach(function(fac,fi){
+    var facTasks=tasks.filter(function(t){return t.fid===fac.id;});
+    var card=document.createElement('div');
+    card.className='sec-card';
+    var listHTML='<button class="add-s" data-action="add-task" data-fid="'+fac.id+'">＋ タスクを追加</button>';
+    if(facTasks.length){
+      listHTML+=facTasks.map(function(t){
+        var s=t.staffId?staff.find(function(x){return x.id===t.staffId;}):null;
+        var r=t.resId?ress.find(function(x){return x.id===t.resId;}):null;
+        var sName=s?s.name:(t.staffName||'');
+        var rName=r?r.name:(t.resName||'');
+        return '<div class="ti" data-action="detail" data-id="'+t.id+'">'+
+          '<div class="ti-body">'+
+            '<div class="ti-txt">'+esc(t.text)+'</div>'+
+            '<div class="ti-meta">'+
+              '<span class="tag '+tagCls(t.tag)+'">'+tagLabel(t.tag)+'</span>'+
+              (rName?'<span class="ti-res">'+esc(rName)+'</span>':'')+
+              (sName?'<span class="ti-assignee">'+esc(sName)+'</span>':'')+
+              '<span class="ti-date">'+fmtD(t.date)+'</span>'+
             '</div>'+
-          '</div>';
-        }).join('');
-      } else {
-        listHTML+='<div class="empty">タスクはありません</div>';
-      }
-      card.innerHTML=
-        '<div class="sec-hd" data-toggle-sec>'+
-          '<div class="sec-ic '+ICONS[fi%ICONS.length]+'">🏢</div>'+
-          '<div class="sec-ttl">'+esc(fac.name)+'</div>'+
-          '<div class="sec-cnt">'+facTasks.length+'件</div>'+
-          '<div class="chev">▾</div>'+
-        '</div>'+
-        '<div class="sec-bd">'+listHTML+'</div>';
-      cont.appendChild(card);
-    });
+          '</div>'+
+        '</div>';
+      }).join('');
+    } else {
+      listHTML+='<div class="empty">タスクはありません</div>';
+    }
+    card.innerHTML=
+      '<div class="sec-hd" data-toggle-sec>'+
+        '<div class="sec-ic '+ICONS[fi%ICONS.length]+'">🏢</div>'+
+        '<div class="sec-ttl">'+esc(fac.name)+'</div>'+
+        '<div class="sec-cnt">'+facTasks.length+'件</div>'+
+        '<div class="chev">▾</div>'+
+      '</div>'+
+      '<div class="sec-bd">'+listHTML+'</div>';
+    cont.appendChild(card);
   });
 }
 
@@ -1096,12 +1082,17 @@ function initButtons(){
 document.addEventListener('DOMContentLoaded',function(){
   initData();
   initButtons();
-  // まず先にホームを描画（ローカルデータで表示）
+  // DBステータスを初期化
+  setDbStatus(false);
+  // 即座にホームを描画
   renderHome();
-  // バックグラウンドで設定を取得して再描画
-  fetchSettingsFromDB(function(){
-    renderHome();
-  });
+  // 設定をバックグラウンドで取得（完了後に静かに再描画）
+  setTimeout(function(){
+    fetchSettingsFromDB(function(){
+      var pg=document.querySelector('.page.active');
+      if(pg&&pg.id==='pg-home') renderHome();
+    });
+  }, 100);
 });
 
 })();
