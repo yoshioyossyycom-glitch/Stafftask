@@ -558,7 +558,6 @@ function deleteTaskFromDB(id,cb){
     .then(function(){if(cb)cb(true);})
     .catch(function(err){console.warn('削除失敗:',err);if(cb)cb(false);});
 }
-}
 
 /* ══ ユーティリティ ══ */
 var DOW=['日','月','火','水','木','金','土'];
