@@ -726,10 +726,11 @@ function renderTL() {
       var r    = t.resId   ? ress.find(function(x)  { return x.id === t.resId; })   : null;
       var sN   = s ? s.name : (t.staffName || '');
       var rN   = r ? r.name : (t.resName   || '');
-      var who  = rN || sN || (fac ? fac.name : '—');
+      var who  = rN ? rN : (fac ? fac.name : '—');
+      var sub  = rN && fac ? fac.name : '';
       return '<div class="tl-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
         '<div class="tl-hd">' +
-          '<div class="tl-who">'+esc(who)+(fac?' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(fac.name)+'</span>':'')+'</div>' +
+          '<div class="tl-who">'+esc(who)+(sub?' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(sub)+'</span>':'')+'</div>' +
           (sN  ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
         '</div>' +
