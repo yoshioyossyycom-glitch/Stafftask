@@ -911,6 +911,7 @@ function openDetail(id) {
     '\nステータス：' + tL(t.tag) +
     (r  ? '\n利用者：' + r.name  : '') +
     (s  ? '\n対応者：' + s.name  : '') +
+    (t.due ? '\n期日：' + fmtD(t.due) : '\n期日：未定') +
     '\n\n' + t.text;
   openOv('ov-detail');
 }
