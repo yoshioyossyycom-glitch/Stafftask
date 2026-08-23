@@ -804,6 +804,7 @@ function renderCalSel(dueMap) {
       var rN  = r ? r.name : (t.resName||'');
       return '<div class="cal-task-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
         '<div class="cal-task-txt">'+esc(t.text)+'</div>' +
+        (t.progress ? '<div style="font-size:12px;color:var(--txs);margin:3px 0 4px;">📝 '+esc(t.progress)+'</div>' : '') +
         '<div class="cal-task-meta">' +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
           (fac ? '<span style="font-size:10px;color:var(--txm);">'+esc(fac.name)+'</span>' : '') +
