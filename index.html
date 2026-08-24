@@ -137,10 +137,18 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .mitem.ob{border-bottom:2.5px solid var(--acc);}
 
 .tl-main{padding:0 0 90px;flex:1;overflow-y:auto;display:flex;flex-direction:column;}
-.tl-filter{display:flex;gap:8px;padding:12px 14px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--bdr);}
+.tl-filters{background:var(--card);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.tl-filter{display:flex;gap:8px;padding:10px 14px 6px;overflow-x:auto;scrollbar-width:none;}
 .tl-filter::-webkit-scrollbar{display:none;}
-.tl-chip{white-space:nowrap;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--txs);font-family:inherit;flex-shrink:0;}
+.tl-filter2{display:flex;gap:6px;padding:6px 14px 10px;overflow-x:auto;scrollbar-width:none;}
+.tl-filter2::-webkit-scrollbar{display:none;}
+.tl-chip{white-space:nowrap;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--txs);font-family:inherit;flex-shrink:0;}
 .tl-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.tl-chip2{white-space:nowrap;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--txs);font-family:inherit;flex-shrink:0;}
+.tl-chip2.active{color:#fff;}
+.tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;}
+.tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);}
+.tl-chip2.ad{border-color:var(--grn);color:var(--grn);}.tl-chip2.ad.active{background:var(--grn);}
 .tl-scroll{flex:1;overflow-y:auto;padding:16px 14px 16px;}
 .tl-day{margin-bottom:24px;}
 .tl-dlbl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -220,7 +228,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
     </div>
   </header>
   <div class="tl-main">
-    <div class="tl-filter" id="tl-filter"></div>
+    <div class="tl-filters">
+      <div class="tl-filter" id="tl-filter"></div>
+      <div class="tl-filter2" id="tl-filter2"></div>
+    </div>
     <div class="tl-scroll"><div id="tl-body"></div></div>
   </div>
   <nav class="bbar">
@@ -365,6 +376,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
     <div class="fg"><label class="fl">利用者（任意）</label><select class="fs" id="t-res"></select></div>
     <div class="fg"><label class="fl">対応者（任意）</label><select class="fs" id="t-staff"></select></div>
     <div class="fg"><label class="fl">内容</label><textarea class="fta" id="t-txt" placeholder="タスク内容を入力…"></textarea></div>
+    <div class="fg"><label class="fl">時間（任意）</label>
+      <input type="text" class="fi" id="t-time" placeholder="例：10:00〜11:00、午後など">
+    </div>
     <div class="fg"><label class="fl">ステータス</label>
       <select class="fs" id="t-tag">
         <option value="todo">未着手</option>
@@ -568,6 +582,7 @@ function saveTaskDB(t) {
     date:      t.date      || '',
     due:       t.due       || '',
     text:      t.text      || '',
+    time:      t.time      || '',
     progress:  t.progress  || '',
     tag:       t.tag       || 'todo',
     staffId:   t.staffId   || '',
@@ -695,14 +710,23 @@ function drawHome(cont, tasks) {
 }
 
 /* タイムライン */
-var _tlF = 'all';
+var _tlF  = 'all';
+var _tlS  = 'all'; // ステータスフィルター
 function renderTL() {
   var facs = getFacs(), staff = getStaff(), ress = getRes(), tasks = getTasks();
   var chips = [{id:'all', name:'すべて'}].concat(facs);
   document.getElementById('tl-filter').innerHTML = chips.map(function(f) {
     return '<button class="tl-chip'+(_tlF===f.id?' active':'')+'" data-action="tl-f" data-fid="'+f.id+'">'+esc(f.name)+'</button>';
   }).join('');
-  var filtered = tasks.filter(function(t) { return _tlF==='all' || t.fid===_tlF; })
+  document.getElementById('tl-filter2').innerHTML =
+    '<button class="tl-chip2'+(_tlS==='all'?' active':'')+'" data-action="tl-s" data-tag="all">すべて</button>' +
+    '<button class="tl-chip2 at'+(_tlS==='todo'?' active':'')+'" data-action="tl-s" data-tag="todo">未着手</button>' +
+    '<button class="tl-chip2 aw'+(_tlS==='wip'?' active':'')+'" data-action="tl-s" data-tag="wip">対応中</button>' +
+    '<button class="tl-chip2 ad'+(_tlS==='done'?' active':'')+'" data-action="tl-s" data-tag="done">対応済み</button>';
+
+  var filtered = tasks
+    .filter(function(t) { return _tlF==='all' || t.fid===_tlF; })
+    .filter(function(t) { return _tlS==='all' || t.tag===_tlS; })
     .sort(function(a,b) { return b.date.localeCompare(a.date) || (b.createdAt||'').localeCompare(a.createdAt||''); });
   var body = document.getElementById('tl-body');
   if (!filtered.length) { body.innerHTML = '<div class="tl-empty">📭 タスクがまだありません</div>'; return; }
@@ -730,6 +754,7 @@ function renderTL() {
           (sN ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
         '</div>' +
+        (t.time ? '<div style="font-size:12px;color:var(--acc);font-weight:500;margin-bottom:4px;">🕐 '+esc(t.time)+'</div>' : '') +
         '<div class="tl-txt">'+esc(t.text)+'</div>' +
         (t.progress ? '<div class="tl-prog">📝 '+esc(t.progress)+'</div>' : '') +
       '</div>';
@@ -829,6 +854,7 @@ function openTaskModal(facId) {
   document.getElementById('due-type-date').checked = true;
   document.getElementById('due-date-wrap').style.display = '';
   document.getElementById('t-progress').value = '';
+  document.getElementById('t-time').value = '';
   var facs = getFacs();
   document.getElementById('t-fac').innerHTML = facs.map(function(f) {
     return '<option value="'+f.id+'"'+(f.id===facId?' selected':'')+'>'+esc(f.name)+'</option>';
@@ -872,6 +898,7 @@ function doSaveTask() {
     date:      document.getElementById('t-date').value,
     due:       isDueDate ? (document.getElementById('t-due').value || null) : null,
     text:      txt,
+    time:      document.getElementById('t-time').value.trim() || null,
     progress:  document.getElementById('t-progress').value.trim() || null,
     tag:       document.getElementById('t-tag').value,
     staffId:   document.getElementById('t-staff').value || null,
@@ -904,6 +931,7 @@ function openDetail(id) {
     (r ? '\n利用者：'  + r.name : '') +
     (s ? '\n対応者：'  + s.name : '') +
     (t.due ? '\n期日：' + fmtD(t.due) : '\n期日：未定') +
+    (t.time ? '\n時間：' + t.time : '') +
     (t.progress ? '\n進捗：' + t.progress : '') +
     '\n\n' + t.text;
   openOv('ov-detail');
@@ -920,6 +948,7 @@ function openEditTask() {
   document.getElementById('t-txt').value = t.text;
   document.getElementById('t-tag').value = t.tag;
   document.getElementById('t-progress').value = t.progress || '';
+  document.getElementById('t-time').value = t.time || '';
   if (t.due) {
     document.getElementById('due-type-date').checked = true;
     document.getElementById('due-date-wrap').style.display = '';
@@ -1164,6 +1193,7 @@ document.addEventListener('click', function(e) {
   if (act==='edit-res')   { openResModal(id); return; }
   if (act==='del-res')    { delRes(id); return; }
   if (act==='tl-f')       { _tlF = btn.dataset.fid; renderTL(); return; }
+  if (act==='tl-s')       { _tlS = btn.dataset.tag; renderTL(); return; }
   if (act==='cal-day')    { _calSel = btn.dataset.date; renderCal(); return; }
 });
 
