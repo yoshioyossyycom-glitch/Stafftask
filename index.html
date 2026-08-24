@@ -145,9 +145,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-chip{white-space:nowrap;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--txs);font-family:inherit;flex-shrink:0;}
 .tl-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
 .tl-chip2{white-space:nowrap;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--tx);font-family:inherit;flex-shrink:0;}
-.tl-chip2.active{color:#fff;background:var(--navy);border-color:var(--navy);}
-.tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;border-color:#3a5fc8;}
-.tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);border-color:var(--amb);}
+.tl-chip2.active{color:#fff;background:var(--txs);border-color:var(--txs);}
+.tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;border-color:#3a5fc8;color:#fff;}
+.tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);border-color:var(--amb);color:#fff;}
 .tl-chip2.ad{border-color:var(--red);color:var(--red);}.tl-chip2.ad.active{background:var(--red);border-color:var(--red);color:#fff;}
 .tl-scroll{flex:1;overflow-y:auto;padding:16px 14px 16px;}
 .tl-day{margin-bottom:24px;}
@@ -741,11 +741,11 @@ function drawHome(cont, tasks) {
 }
 
 /* タイムライン */
-var _tlF  = 'all';
-var _tlS  = 'all'; // ステータスフィルター
+var _tlF  = 'fac-all';
+var _tlS  = 'all';
 function renderTL() {
   var facs = getFacs(), staff = getStaff(), ress = getRes(), tasks = getTasks();
-  var chips = [{id:'all', name:'すべて'}].concat(facs);
+  var chips = [{id:'fac-all', name:'すべて'}].concat(facs);
   document.getElementById('tl-filter').innerHTML = chips.map(function(f) {
     return '<button class="tl-chip'+(_tlF===f.id?' active':'')+'" data-action="tl-f" data-fid="'+f.id+'">'+esc(f.name)+'</button>';
   }).join('');
@@ -756,7 +756,7 @@ function renderTL() {
     '<button class="tl-chip2 ad'+(_tlS==='done'?' active':'')+'" data-action="tl-s" data-tag="done">✔︎ 対応済み</button>';
 
   var filtered = tasks
-    .filter(function(t) { return _tlF==='all' || t.fid===_tlF; })
+    .filter(function(t) { return _tlF==='fac-all' || t.fid===_tlF; })
     .filter(function(t) { return _tlS==='all' || t.tag===_tlS; })
     .sort(function(a,b) { return b.date.localeCompare(a.date) || (b.createdAt||'').localeCompare(a.createdAt||''); });
   var body = document.getElementById('tl-body');
