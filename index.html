@@ -144,11 +144,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-filter2::-webkit-scrollbar{display:none;}
 .tl-chip{white-space:nowrap;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--txs);font-family:inherit;flex-shrink:0;}
 .tl-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
-.tl-chip2{white-space:nowrap;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--txs);font-family:inherit;flex-shrink:0;}
-.tl-chip2.active{color:#fff;}
-.tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;}
-.tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);}
-.tl-chip2.ad{border-color:var(--grn);color:var(--grn);}.tl-chip2.ad.active{background:var(--grn);}
+.tl-chip2{white-space:nowrap;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--tx);font-family:inherit;flex-shrink:0;}
+.tl-chip2.active{color:#fff;background:var(--navy);border-color:var(--navy);}
+.tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;border-color:#3a5fc8;}
+.tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);border-color:var(--amb);}
+.tl-chip2.ad{border-color:var(--grn);color:var(--grn);}.tl-chip2.ad.active{background:var(--grn);border-color:var(--grn);}
 .tl-scroll{flex:1;overflow-y:auto;padding:16px 14px 16px;}
 .tl-day{margin-bottom:24px;}
 .tl-dlbl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -377,7 +377,44 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
     <div class="fg"><label class="fl">対応者（任意）</label><select class="fs" id="t-staff"></select></div>
     <div class="fg"><label class="fl">内容</label><textarea class="fta" id="t-txt" placeholder="タスク内容を入力…"></textarea></div>
     <div class="fg"><label class="fl">時間（任意）</label>
-      <input type="text" class="fi" id="t-time" placeholder="例：10:00〜11:00、午後など">
+      <select class="fs" id="t-time">
+        <option value="">未設定</option>
+        <optgroup label="午前">
+          <option value="AM 6:00">AM 6:00</option>
+          <option value="AM 6:30">AM 6:30</option>
+          <option value="AM 7:00">AM 7:00</option>
+          <option value="AM 7:30">AM 7:30</option>
+          <option value="AM 8:00">AM 8:00</option>
+          <option value="AM 8:30">AM 8:30</option>
+          <option value="AM 9:00">AM 9:00</option>
+          <option value="AM 9:30">AM 9:30</option>
+          <option value="AM 10:00">AM 10:00</option>
+          <option value="AM 10:30">AM 10:30</option>
+          <option value="AM 11:00">AM 11:00</option>
+          <option value="AM 11:30">AM 11:30</option>
+        </optgroup>
+        <optgroup label="午後">
+          <option value="PM 12:00">PM 12:00（正午）</option>
+          <option value="PM 12:30">PM 12:30</option>
+          <option value="PM 1:00">PM 1:00</option>
+          <option value="PM 1:30">PM 1:30</option>
+          <option value="PM 2:00">PM 2:00</option>
+          <option value="PM 2:30">PM 2:30</option>
+          <option value="PM 3:00">PM 3:00</option>
+          <option value="PM 3:30">PM 3:30</option>
+          <option value="PM 4:00">PM 4:00</option>
+          <option value="PM 4:30">PM 4:30</option>
+          <option value="PM 5:00">PM 5:00</option>
+          <option value="PM 5:30">PM 5:30</option>
+          <option value="PM 6:00">PM 6:00</option>
+          <option value="PM 6:30">PM 6:30</option>
+          <option value="PM 7:00">PM 7:00</option>
+          <option value="PM 7:30">PM 7:30</option>
+          <option value="PM 8:00">PM 8:00</option>
+          <option value="PM 8:30">PM 8:30</option>
+          <option value="PM 9:00">PM 9:00</option>
+        </optgroup>
+      </select>
     </div>
     <div class="fg"><label class="fl">ステータス</label>
       <select class="fs" id="t-tag">
