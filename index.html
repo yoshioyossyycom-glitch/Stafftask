@@ -1245,6 +1245,7 @@ document.addEventListener('click', function(e) {
     if (wrap) wrap.remove();
     return;
   }
+  if (act==='tl-f')       { _tlF = btn.dataset.fid; renderTL(); return; }
   if (act==='tl-s')       { _tlS = btn.dataset.tag; renderTL(); return; }
   if (act==='cal-day')    { _calSel = btn.dataset.date; renderCal(); return; }
 });
