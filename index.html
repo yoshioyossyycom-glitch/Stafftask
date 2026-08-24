@@ -848,7 +848,12 @@ function renderCalSel(dueMap) {
   if (!_calSel) { el.innerHTML = '<div class="cal-empty">日付をタップすると期日のタスクが表示されます</div>'; return; }
   var facs = getFacs(), staff = getStaff(), ress = getRes();
   var dm   = dueMap || {};
-  var dt   = dm[_calSel] || getTasks().filter(function(t) { return t.due === _calSel; });
+  var dt   = dm[_calSel] ? dm[_calSel].slice() : getTasks().filter(function(t) { return t.due === _calSel; });
+  // 時間順にソート（時間未設定は後ろ）
+  dt.sort(function(a, b) {
+    var at = a.time || '99:99', bt = b.time || '99:99';
+    return at.localeCompare(bt);
+  });
   var d    = new Date(_calSel+'T00:00:00');
   el.innerHTML = '<div class="cal-sel-lbl">📅 '+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）の期日タスク</div>' +
     (dt.length ? dt.map(function(t) {
@@ -858,6 +863,7 @@ function renderCalSel(dueMap) {
       var sN  = s ? s.name : (t.staffName||'');
       var rN  = r ? r.name : (t.resName||'');
       return '<div class="cal-task-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
+        (t.time ? '<div style="font-size:13px;color:var(--acc);font-weight:700;margin-bottom:4px;">🕐 '+esc(t.time)+'</div>' : '') +
         '<div class="cal-task-txt">'+esc(t.text)+'</div>' +
         (t.progress ? '<div style="font-size:12px;color:var(--txs);margin:3px 0 4px;">📝 '+esc(t.progress)+'</div>' : '') +
         '<div class="cal-task-meta">' +
