@@ -431,8 +431,14 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
         <input type="date" class="dhi" id="t-due">
       </div>
     </div>
-    <div class="fg"><label class="fl">進捗状況（任意）</label>
-      <textarea class="fta fta-sm" id="t-progress" placeholder="進捗状況を入力…"></textarea>
+    <div class="fg">
+      <label class="fl">進捗状況（任意）</label>
+      <div id="progress-list">
+        <textarea class="fta fta-sm" id="t-progress-0" placeholder="進捗状況を入力…"></textarea>
+      </div>
+      <button type="button" id="btn-add-progress" style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:none;border:1.5px dashed var(--bdr);border-radius:var(--rs);color:var(--acc);font-size:13px;font-family:inherit;cursor:pointer;width:100%;justify-content:center;">
+        ＋ 進捗状況を追加
+      </button>
     </div>
     <div class="mact">
       <button class="bcnl" id="task-cnl">キャンセル</button>
@@ -614,7 +620,7 @@ function saveTaskDB(t) {
     due:       t.due       || '',
     text:      t.text      || '',
     time:      t.time      || '',
-    progress:  t.progress  || '',
+    progress:  Array.isArray(t.progress) ? t.progress : (t.progress ? [t.progress] : []),
     tag:       t.tag       || 'todo',
     staffId:   t.staffId   || '',
     staffName: staff       ? staff.name : '',
@@ -787,7 +793,7 @@ function renderTL() {
         (dueStr ? '<div class="tl-due">📅 '+esc(dueStr)+'</div>' : '') +
         (t.time ? '<div style="font-size:12px;color:var(--acc);font-weight:500;margin-bottom:4px;">🕐 '+esc(t.time)+'</div>' : '') +
         '<div class="tl-txt">'+esc(t.text)+'</div>' +
-        (t.progress ? '<div class="tl-prog">📝 '+esc(t.progress)+'</div>' : '') +
+        (t.progress && t.progress.length ? (Array.isArray(t.progress)?t.progress:[t.progress]).map(function(p){ return '<div class="tl-prog">📝 '+esc(p)+'</div>'; }).join('') : '') +
       '</div>';
     }).join('');
     return '<div class="tl-day"><div class="tl-dlbl"><span class="tl-dtxt">'+fmtDFull(date)+'</span></div>'+items+'</div>';
@@ -866,7 +872,7 @@ function renderCalSel(dueMap) {
       return '<div class="cal-task-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
         (t.time ? '<div style="font-size:13px;color:var(--acc);font-weight:700;margin-bottom:4px;">🕐 '+esc(t.time)+'</div>' : '') +
         '<div class="cal-task-txt">'+esc(t.text)+'</div>' +
-        (t.progress ? '<div style="font-size:12px;color:var(--txs);margin:3px 0 4px;">📝 '+esc(t.progress)+'</div>' : '') +
+        (t.progress && t.progress.length ? (Array.isArray(t.progress)?t.progress:[t.progress]).map(function(p){ return '<div style="font-size:12px;color:var(--txs);margin:2px 0;">📝 '+esc(p)+'</div>'; }).join('') : '') +
         '<div class="cal-task-meta">' +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
           (fac ? '<span style="font-size:10px;color:var(--txm);">'+esc(fac.name)+'</span>' : '') +
@@ -890,7 +896,7 @@ function openTaskModal(facId) {
   document.getElementById('t-due-disp').textContent = '';
   document.getElementById('due-type-date').checked = true;
   document.getElementById('due-date-wrap').style.display = '';
-  document.getElementById('t-progress').value = '';
+  initProgressList([]);
   setTimeValue(null);
   var facs = getFacs();
   document.getElementById('t-fac').innerHTML = facs.map(function(f) {
@@ -936,7 +942,7 @@ function doSaveTask() {
     due:       isDueDate ? (document.getElementById('t-due').value || null) : null,
     text:      txt,
     time:      getTimeValue(),
-    progress:  document.getElementById('t-progress').value.trim() || null,
+    progress:  getProgressValues(),
     tag:       document.getElementById('t-tag').value,
     staffId:   document.getElementById('t-staff').value || null,
     createdAt: new Date().toISOString()
@@ -969,7 +975,7 @@ function openDetail(id) {
     (s ? '\n対応者：'  + s.name : '') +
     (t.due ? '\n期日：' + fmtD(t.due) : '\n期日：未定') +
     (t.time ? '\n時間：' + t.time : '') +
-    (t.progress ? '\n進捗：' + t.progress : '') +
+    (t.progress && t.progress.length ? '\n進捗：\n' + (Array.isArray(t.progress)?t.progress:[t.progress]).map(function(p,i){ return '  '+(i+1)+'. '+p; }).join('\n') : '') +
     '\n\n' + t.text;
   openOv('ov-detail');
 }
@@ -984,7 +990,8 @@ function openEditTask() {
   updateDD();
   document.getElementById('t-txt').value = t.text;
   document.getElementById('t-tag').value = t.tag;
-  document.getElementById('t-progress').value = t.progress || '';
+  var progVals = Array.isArray(t.progress) ? t.progress : (t.progress ? [t.progress] : []);
+  initProgressList(progVals);
   setTimeValue(t.time || null);
   if (t.due) {
     document.getElementById('due-type-date').checked = true;
@@ -1229,7 +1236,12 @@ document.addEventListener('click', function(e) {
   if (act==='del-staff')  { delStaff(id); return; }
   if (act==='edit-res')   { openResModal(id); return; }
   if (act==='del-res')    { delRes(id); return; }
-  if (act==='tl-f')       { _tlF = btn.dataset.fid; renderTL(); return; }
+  if (act==='del-progress') {
+    var idx = btn.dataset.idx;
+    var wrap = btn.closest('[data-idx]');
+    if (wrap) wrap.remove();
+    return;
+  }
   if (act==='tl-s')       { _tlS = btn.dataset.tag; renderTL(); return; }
   if (act==='cal-day')    { _calSel = btn.dataset.date; renderCal(); return; }
 });
@@ -1240,6 +1252,39 @@ document.addEventListener('change', function(e) {
   if (e.target.id==='t-due')       { updateDueDisp(); }
   if (e.target.name==='due-type')  { onDueTypeChange(); }
 });
+
+/* 進捗状況 複数管理 */
+var _progressCount = 1;
+function initProgressList(values) {
+  _progressCount = 1;
+  var list = document.getElementById('progress-list');
+  list.innerHTML = '<textarea class="fta fta-sm" id="t-progress-0" placeholder="進捗状況を入力…"></textarea>';
+  if (values && values.length > 0) {
+    document.getElementById('t-progress-0').value = values[0] || '';
+    for (var i = 1; i < values.length; i++) {
+      addProgressField(values[i]);
+    }
+  }
+}
+function addProgressField(val) {
+  var list = document.getElementById('progress-list');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:flex-start;margin-top:8px;';
+  div.dataset.idx = _progressCount;
+  div.innerHTML =
+    '<textarea class="fta fta-sm" id="t-progress-'+_progressCount+'" placeholder="進捗状況を入力…" style="flex:1;">'+(val||'')+'</textarea>' +
+    '<button type="button" data-action="del-progress" data-idx="'+_progressCount+'" style="width:36px;height:36px;border-radius:var(--rs);border:none;background:var(--reds);color:var(--red);font-size:18px;cursor:pointer;flex-shrink:0;margin-top:2px;">🗑</button>';
+  list.appendChild(div);
+  _progressCount++;
+}
+function getProgressValues() {
+  var vals = [];
+  for (var i = 0; i < _progressCount; i++) {
+    var el = document.getElementById('t-progress-'+i);
+    if (el && el.value.trim()) vals.push(el.value.trim());
+  }
+  return vals;
+}
 
 /* 時間セレクト初期化 */
 function initTimeSelect() {
@@ -1289,6 +1334,7 @@ function initButtons() {
   document.getElementById('btn-add-res').onclick    = function(){ openResModal(null); };
   document.getElementById('fab-add').onclick        = function(){ openTaskModal(null); };
   document.getElementById('fab-cal-add').onclick    = function(){ openTaskModalFromCal(); };
+  document.getElementById('btn-add-progress').onclick = function(){ addProgressField(''); };
   document.getElementById('cal-prev').onclick       = function(){ _calM--; if(_calM<0){_calM=11;_calY--;} renderCal(); };
   document.getElementById('cal-next').onclick       = function(){ _calM++; if(_calM>11){_calM=0;_calY++;} renderCal(); };
   document.getElementById('task-cnl').onclick       = function(){ closeOv('ov-task'); };
