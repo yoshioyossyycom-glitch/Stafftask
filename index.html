@@ -66,7 +66,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .ti-res{font-size:10px;color:var(--navy2);background:var(--navyp);padding:1px 7px;border-radius:8px;}
 .ti-staff{font-size:10px;color:var(--txs);background:var(--grns);padding:1px 7px;border-radius:8px;}
 .tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;flex-shrink:0;}
-.ttodo{background:#e8f0ff;color:#3a5fc8}.twip{background:var(--ambs);color:#b87a00}.tdone{background:var(--grns);color:var(--grn)}
+.ttodo{background:#e8f0ff;color:#3a5fc8}.twip{background:var(--ambs);color:#b87a00}.tdone{background:var(--reds);color:var(--red)}
 .add-s{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--acc);padding:8px 16px;cursor:pointer;background:none;border:none;font-family:inherit;border-bottom:1px solid var(--bdr);}
 .add-s:active{opacity:.6;}
 .empty{padding:20px;text-align:center;font-size:13px;color:var(--txm);}
@@ -148,7 +148,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-chip2.active{color:#fff;background:var(--navy);border-color:var(--navy);}
 .tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;border-color:#3a5fc8;}
 .tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);border-color:var(--amb);}
-.tl-chip2.ad{border-color:var(--grn);color:var(--grn);}.tl-chip2.ad.active{background:var(--grn);border-color:var(--grn);}
+.tl-chip2.ad{border-color:var(--red);color:var(--red);}.tl-chip2.ad.active{background:var(--red);border-color:var(--red);}
 .tl-scroll{flex:1;overflow-y:auto;padding:16px 14px 16px;}
 .tl-day{margin-bottom:24px;}
 .tl-dlbl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -644,7 +644,7 @@ function fmtDFull(s) {
   var d = new Date(s+'T00:00:00');
   return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）';
 }
-function tL(t) { return {todo:'未着手', wip:'対応中', done:'対応済み'}[t] || t; }
+function tL(t) { return {todo:'未着手', wip:'対応中', done:'✔︎ 対応済み'}[t] || t; }
 function tC(t) { return {todo:'ttodo',  wip:'twip',   done:'tdone'}[t]   || 'ttodo'; }
 
 function updateDD() {
@@ -752,7 +752,7 @@ function renderTL() {
     '<button class="tl-chip2'+(_tlS==='all'?' active':'')+'" data-action="tl-s" data-tag="all">すべて</button>' +
     '<button class="tl-chip2 at'+(_tlS==='todo'?' active':'')+'" data-action="tl-s" data-tag="todo">未着手</button>' +
     '<button class="tl-chip2 aw'+(_tlS==='wip'?' active':'')+'" data-action="tl-s" data-tag="wip">対応中</button>' +
-    '<button class="tl-chip2 ad'+(_tlS==='done'?' active':'')+'" data-action="tl-s" data-tag="done">対応済み</button>';
+    '<button class="tl-chip2 ad'+(_tlS==='done'?' active':'')+'" data-action="tl-s" data-tag="done">✔︎ 対応済み</button>';
 
   var filtered = tasks
     .filter(function(t) { return _tlF==='all' || t.fid===_tlF; })
