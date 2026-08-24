@@ -862,7 +862,10 @@ function renderCalSel(dueMap) {
     return at.localeCompare(bt);
   });
   var d    = new Date(_calSel+'T00:00:00');
-  el.innerHTML = '<div class="cal-sel-lbl">📅 '+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）の期日タスク</div>' +
+  var done = dt.filter(function(t){ return t.tag==='done'; }).length;
+  var total = dt.length;
+  var doneStr = total > 0 ? ' <span style="font-size:12px;font-weight:500;color:var(--grn);background:var(--grns);padding:2px 10px;border-radius:20px;margin-left:6px;">✔︎ '+done+' / '+total+'件</span>' : '';
+  el.innerHTML = '<div class="cal-sel-lbl">📅 '+(d.getMonth()+1)+'月'+d.getDate()+'日（'+DOW[d.getDay()]+'）の期日タスク'+doneStr+'</div>' +
     (dt.length ? dt.map(function(t) {
       var fac = facs.find(function(f) { return f.id===t.fid; });
       var s   = t.staffId ? staff.find(function(x) { return x.id===t.staffId; }) : null;
