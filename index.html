@@ -148,7 +148,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-chip2.active{color:#fff;background:var(--navy);border-color:var(--navy);}
 .tl-chip2.at{border-color:#3a5fc8;color:#3a5fc8;}.tl-chip2.at.active{background:#3a5fc8;border-color:#3a5fc8;}
 .tl-chip2.aw{border-color:var(--amb);color:#b87a00;}.tl-chip2.aw.active{background:var(--amb);border-color:var(--amb);}
-.tl-chip2.ad{border-color:var(--red);color:var(--red);}.tl-chip2.ad.active{background:var(--red);border-color:var(--red);}
+.tl-chip2.ad{border-color:var(--red);color:var(--red);}.tl-chip2.ad.active{background:var(--red);border-color:var(--red);color:#fff;}
 .tl-scroll{flex:1;overflow-y:auto;padding:16px 14px 16px;}
 .tl-day{margin-bottom:24px;}
 .tl-dlbl{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -157,8 +157,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
 .tl-item{background:var(--card);border-radius:var(--r);border:1px solid var(--bdr);box-shadow:var(--sh);padding:14px 16px;margin-bottom:10px;cursor:pointer;border-left:3px solid var(--acc);}
 .tl-item.stodo{border-left-color:#3a5fc8}.tl-item.swip{border-left-color:var(--amb)}.tl-item.sdone{border-left-color:var(--grn)}
 .tl-item:active{opacity:.8;}
-.tl-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.tl-hd{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:nowrap;}
 .tl-who{font-size:13px;font-weight:700;color:var(--navy);flex:1;min-width:0;}
+.tl-due{font-size:11px;color:var(--acc);font-weight:500;margin-bottom:6px;}
 .tl-fac{font-size:11px;color:var(--txm);background:var(--bg);padding:2px 8px;border-radius:10px;border:1px solid var(--bdr);flex-shrink:0;}
 .tl-txt{font-size:13px;color:var(--tx);line-height:1.6;word-break:break-all;}
 .tl-prog{font-size:12px;color:var(--txs);margin-top:4px;line-height:1.5;}
@@ -778,12 +779,12 @@ function renderTL() {
       return '<div class="tl-item s'+t.tag+'" data-action="detail" data-id="'+t.id+'">' +
         '<div class="tl-hd">' +
           '<div class="tl-who">'+esc(who)+
-            (sub    ? ' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(sub)+'</span>' : '')+
-            (dueStr ? ' <span style="font-size:11px;font-weight:400;color:var(--acc);">/ '+esc(dueStr)+'</span>' : '')+
+            (sub ? ' <span style="font-size:11px;font-weight:400;color:var(--txm);">/ '+esc(sub)+'</span>' : '')+
           '</div>' +
           (sN ? '<div class="tl-fac" style="background:var(--grns);border-color:var(--grn);color:var(--grn);">'+esc(sN)+'</div>' : '') +
           '<span class="tag '+tC(t.tag)+'">'+tL(t.tag)+'</span>' +
         '</div>' +
+        (dueStr ? '<div class="tl-due">📅 '+esc(dueStr)+'</div>' : '') +
         (t.time ? '<div style="font-size:12px;color:var(--acc);font-weight:500;margin-bottom:4px;">🕐 '+esc(t.time)+'</div>' : '') +
         '<div class="tl-txt">'+esc(t.text)+'</div>' +
         (t.progress ? '<div class="tl-prog">📝 '+esc(t.progress)+'</div>' : '') +
