@@ -377,44 +377,37 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
     <div class="fg"><label class="fl">対応者（任意）</label><select class="fs" id="t-staff"></select></div>
     <div class="fg"><label class="fl">内容</label><textarea class="fta" id="t-txt" placeholder="タスク内容を入力…"></textarea></div>
     <div class="fg"><label class="fl">時間（任意）</label>
-      <select class="fs" id="t-time">
-        <option value="">未設定</option>
-        <optgroup label="午前">
-          <option value="AM 6:00">AM 6:00</option>
-          <option value="AM 6:30">AM 6:30</option>
-          <option value="AM 7:00">AM 7:00</option>
-          <option value="AM 7:30">AM 7:30</option>
-          <option value="AM 8:00">AM 8:00</option>
-          <option value="AM 8:30">AM 8:30</option>
-          <option value="AM 9:00">AM 9:00</option>
-          <option value="AM 9:30">AM 9:30</option>
-          <option value="AM 10:00">AM 10:00</option>
-          <option value="AM 10:30">AM 10:30</option>
-          <option value="AM 11:00">AM 11:00</option>
-          <option value="AM 11:30">AM 11:30</option>
-        </optgroup>
-        <optgroup label="午後">
-          <option value="PM 12:00">PM 12:00（正午）</option>
-          <option value="PM 12:30">PM 12:30</option>
-          <option value="PM 1:00">PM 1:00</option>
-          <option value="PM 1:30">PM 1:30</option>
-          <option value="PM 2:00">PM 2:00</option>
-          <option value="PM 2:30">PM 2:30</option>
-          <option value="PM 3:00">PM 3:00</option>
-          <option value="PM 3:30">PM 3:30</option>
-          <option value="PM 4:00">PM 4:00</option>
-          <option value="PM 4:30">PM 4:30</option>
-          <option value="PM 5:00">PM 5:00</option>
-          <option value="PM 5:30">PM 5:30</option>
-          <option value="PM 6:00">PM 6:00</option>
-          <option value="PM 6:30">PM 6:30</option>
-          <option value="PM 7:00">PM 7:00</option>
-          <option value="PM 7:30">PM 7:30</option>
-          <option value="PM 8:00">PM 8:00</option>
-          <option value="PM 8:30">PM 8:30</option>
-          <option value="PM 9:00">PM 9:00</option>
-        </optgroup>
-      </select>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select class="fs" id="t-time-h" style="flex:1;">
+          <option value="">--</option>
+          <option value="0">0時</option>
+          <option value="1">1時</option>
+          <option value="2">2時</option>
+          <option value="3">3時</option>
+          <option value="4">4時</option>
+          <option value="5">5時</option>
+          <option value="6">6時</option>
+          <option value="7">7時</option>
+          <option value="8">8時</option>
+          <option value="9">9時</option>
+          <option value="10">10時</option>
+          <option value="11">11時</option>
+          <option value="12">12時</option>
+          <option value="13">13時</option>
+          <option value="14">14時</option>
+          <option value="15">15時</option>
+          <option value="16">16時</option>
+          <option value="17">17時</option>
+          <option value="18">18時</option>
+          <option value="19">19時</option>
+          <option value="20">20時</option>
+          <option value="21">21時</option>
+          <option value="22">22時</option>
+          <option value="23">23時</option>
+        </select>
+        <span style="font-size:16px;font-weight:700;color:var(--txs);">:</span>
+        <select class="fs" id="t-time-m" style="flex:1;"></select>
+      </div>
     </div>
     <div class="fg"><label class="fl">ステータス</label>
       <select class="fs" id="t-tag">
@@ -891,7 +884,7 @@ function openTaskModal(facId) {
   document.getElementById('due-type-date').checked = true;
   document.getElementById('due-date-wrap').style.display = '';
   document.getElementById('t-progress').value = '';
-  document.getElementById('t-time').value = '';
+  setTimeValue(null);
   var facs = getFacs();
   document.getElementById('t-fac').innerHTML = facs.map(function(f) {
     return '<option value="'+f.id+'"'+(f.id===facId?' selected':'')+'>'+esc(f.name)+'</option>';
@@ -935,7 +928,7 @@ function doSaveTask() {
     date:      document.getElementById('t-date').value,
     due:       isDueDate ? (document.getElementById('t-due').value || null) : null,
     text:      txt,
-    time:      document.getElementById('t-time').value.trim() || null,
+    time:      getTimeValue(),
     progress:  document.getElementById('t-progress').value.trim() || null,
     tag:       document.getElementById('t-tag').value,
     staffId:   document.getElementById('t-staff').value || null,
@@ -985,7 +978,7 @@ function openEditTask() {
   document.getElementById('t-txt').value = t.text;
   document.getElementById('t-tag').value = t.tag;
   document.getElementById('t-progress').value = t.progress || '';
-  document.getElementById('t-time').value = t.time || '';
+  setTimeValue(t.time || null);
   if (t.due) {
     document.getElementById('due-type-date').checked = true;
     document.getElementById('due-date-wrap').style.display = '';
@@ -1241,6 +1234,34 @@ document.addEventListener('change', function(e) {
   if (e.target.name==='due-type')  { onDueTypeChange(); }
 });
 
+/* 時間セレクト初期化 */
+function initTimeSelect() {
+  var mSel = document.getElementById('t-time-m');
+  var html = '<option value="">--</option>';
+  for (var i = 0; i <= 59; i++) {
+    html += '<option value="'+(i<10?'0':'')+i+'">'+(i<10?'0':'')+i+'分</option>';
+  }
+  mSel.innerHTML = html;
+}
+function getTimeValue() {
+  var h = document.getElementById('t-time-h').value;
+  var m = document.getElementById('t-time-m').value;
+  if (h === '' || m === '') return null;
+  return h + ':' + m;
+}
+function setTimeValue(val) {
+  if (!val) {
+    document.getElementById('t-time-h').value = '';
+    document.getElementById('t-time-m').value = '';
+    return;
+  }
+  var parts = val.split(':');
+  if (parts.length >= 2) {
+    document.getElementById('t-time-h').value = String(parseInt(parts[0]));
+    document.getElementById('t-time-m').value = parts[1].length === 1 ? '0'+parts[1] : parts[1];
+  }
+}
+
 /* ボタン登録 */
 function initButtons() {
   function go(id, pg) { var el = document.getElementById(id); if (el) el.onclick = function(){ showPage(pg); }; }
@@ -1286,6 +1307,7 @@ function initButtons() {
 /* 起動 */
 document.addEventListener('DOMContentLoaded', function(){
   initData();
+  initTimeSelect();
   initButtons();
   setDbStatus(false);
   renderHome();
